@@ -1,3 +1,17 @@
+"""
+Author        : Pak Yin (Renzo) Lam
+                British Antarctic Survey
+                paklam@bas.ac.uk
+
+Date Created  : 2024-07-31
+Last Modified : 2024-07-31
+
+Summary       : Class for holding data of the parameters of the run
+
+List of classes:
+- MainRunParams
+"""
+
 import logging
 import json
 from pathlib import Path
@@ -8,7 +22,11 @@ from copy import deepcopy
 
 logger = logging.getLogger(__name__)
 
+
 class MainRunParams:
+    """
+    Class containing all info for the run
+    """
 
     abs_data_file_path: Path  # The absolute path of the downloaded data file
     output_dir: Path  # Where all the generated files go to
@@ -16,11 +34,9 @@ class MainRunParams:
 
     def __init__(self):
 
-        json_path = (Path(__file__).parent.parent
-                     / 'runparams'
-                     / 'main_runparams.json')
+        json_path = Path(__file__).parent.parent / "runparams" / "main_runparams.json"
 
-        with open(json_path, 'r') as f:
+        with open(json_path, "r") as f:
             paramsdict = json.load(f, object_hook=lambda x: SimpleNamespace(**x))
 
         # Automatically turns the data of the param json file into ths class' attributes
@@ -53,4 +69,4 @@ class MainRunParams:
                 setattr(self, attr, attr_2_set)
 
         # Set up the destinations of other directories needed
-        self.log_dir = self.output_dir / 'logs'
+        self.log_dir = self.output_dir / "logs"
