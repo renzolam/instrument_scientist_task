@@ -53,7 +53,7 @@ def data_to_json(
     with open(main_params.abs_data_file_path, 'r') as f:
         lines = f.readlines()
 
-        for idx, line in enumerate(lines[32:]):
+        for idx, line in enumerate(lines):
 
             if line.startswith('#'):  # Ignoring comments
                 pass
@@ -96,14 +96,14 @@ def data_to_json(
                             # Add coords to the latest dict which contains a measurement
                             data[record_time.year][record_time_list[-1].isoformat()][-1].update(
                                 dict(
-                                    zip(geo_coord_keys, split_line)
+                                    zip(geo_coord_keys, split_line[1:])
                                 )
                             )
 
                         elif split_line[0] == 1:
                             data[record_time.year][record_time_list[-1].isoformat()][-1].update(
                                 dict(
-                                    zip(aacgm_coord_keys, split_line)
+                                    zip(aacgm_coord_keys, split_line[1:])
                                 )
                             )
 
