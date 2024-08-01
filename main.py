@@ -13,6 +13,7 @@ import logging
 
 from classes import main_runparams_cls
 from common_utils import log_utils
+import file_conversion
 
 
 if __name__ == "__main__":
@@ -22,3 +23,5 @@ if __name__ == "__main__":
 
     logger = logging.getLogger(__name__)
     log_utils.set_logger(logger)
+
+    file_conversion.data_to_json(main_runparams)
