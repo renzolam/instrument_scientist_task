@@ -13,24 +13,35 @@ import logging
 from datetime import datetime, timedelta, timezone
 import json
 from time import time
+from copy import deepcopy
 
 import numpy as np
 
 from common_utils import log_utils
-from classes.main_runparams_cls import MainRunParams
+from classes import main_runparams_cls
 
 logger = logging.getLogger(__name__)
 log_utils.set_logger(logger)
 
 
 def data_to_json(
-        main_params: MainRunParams,
+        main_params: main_runparams_cls.MainRunParams,
 ):
-    """"""
+    """
+
+    Parameters
+    ----------
+    main_params: main_runparams_cls.MainRunParams
+        Parameters for the run. Used here to know where the data txt file is
+
+    Returns
+    -------
+
+    """
     # Initialisation
 
     # Directory where the json files are going to be stored at
-    json_out_dir = main_params.output_dir / 'vorticity_json'
+    json_out_dir = deepcopy(main_runparams_cls.json_out_dir)
     if not json_out_dir.exists():
         json_out_dir.mkdir(parents=True)
 
