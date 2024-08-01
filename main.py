@@ -18,7 +18,6 @@ from common_utils import log_utils
 import read_data
 import file_conversion
 
-
 if __name__ == "__main__":
 
     # Initialisation
@@ -30,8 +29,18 @@ if __name__ == "__main__":
     t_start = time()
     ############################
 
-    if not main_runparams.use_existing_json_data:
-        file_conversion.data_to_json(main_runparams)
+    # Convert original txt data file into json files, if explicitly told to do so,
+    # or there aren't any json files in the directory
+    if (not main_runparams.use_existing_json_data
+            or len(list(main_runparams_cls.json_out_dir.glob('*vorticity.json'))) == 0):
+
+        try:
+            file_conversion.data_to_json(main_runparams)
+        except Exception as e:
+            logger.exception(e)
+
+    else:
+        pass
 
     vort_list = read_data.json_to_list()
     logger.info(f'Memory occupied by all vorticity data is {getsizeof(vort_list) / 1e6} MB')
