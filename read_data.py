@@ -16,8 +16,9 @@ List of functions:
 
 import logging
 import json
+from time import time
 from pathlib import Path
-from typing import List
+from typing import List, Union
 
 import numpy as np
 import ray
@@ -34,7 +35,7 @@ log_utils.set_logger(logger)
 @ray.remote
 def gen_vort_obj_by_year(
         file_abs_path: Path
-) -> NDArray[VortMeasurement]:
+) -> Union[NDArray[VortMeasurement], None]:
     """
     Turns data in a json file into a numpy array of VortMeasurement objects
 
@@ -45,22 +46,31 @@ def gen_vort_obj_by_year(
 
     Returns
     -------
-    numpy array of VortMeasurement objects
+    numpy array of VortMeasurement objects, or None if the reading process failed
     """
 
-    with open(file_abs_path, 'r') as f:
-        data_dict = json.load(f)
+    logger = logging.getLogger(__name__)
+    log_utils.set_logger(logger)
 
-    vort_yearly = np.array(
-        [VortMeasurement(vort_dict, iso_time_str)
-         for iso_time_str, vort_list in data_dict.items()
-         for vort_dict in vort_list]
-    )
+    try:
+        with open(file_abs_path, 'r') as f:
+            data_dict = json.load(f)
 
-    return vort_yearly
+        vort_yearly = np.array(
+            [VortMeasurement(vort_dict, iso_time_str)
+             for iso_time_str, vort_list in data_dict.items()
+             for vort_dict in vort_list]
+        )
+
+        return vort_yearly
+
+    except Exception as e:
+        logger.exception(e)
+
+        return np.array([np.nan])
 
 
-def json_to_array() -> NDArray[VortMeasurement]:
+def json_to_array() -> NDArray[Union[VortMeasurement, None]]:
     """
        Turns data in several json files into a single numpy array of VortMeasurement objects
 
@@ -69,15 +79,18 @@ def json_to_array() -> NDArray[VortMeasurement]:
 
        Returns
        -------
-       numpy array of VortMeasurement objects
+       numpy array of VortMeasurement objects, or None if the reading process failed
        """
 
     json_files = list(main_runparams_cls.json_out_dir.glob('*vorticity.json'))  # list of all json files
 
+    t_read_start = time()
     ray.init()
     all_vort = ray.get(
         [gen_vort_obj_by_year.remote(vort_file) for vort_file in json_files]
     )
     ray.shutdown()
+
+    logger.info(f'Reading in all json files took {time() - t_read_start} seconds')
 
     return np.concatenate(all_vort)
