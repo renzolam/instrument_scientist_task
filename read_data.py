@@ -25,7 +25,7 @@ from numpy.typing import NDArray
 
 from common_utils import log_utils
 from classes import main_runparams_cls
-from classes.data_class import vort_measurement
+from classes.data_class import VortMeasurement
 
 logger = logging.getLogger(__name__)
 log_utils.set_logger(logger)
@@ -34,9 +34,9 @@ log_utils.set_logger(logger)
 @ray.remote
 def gen_vort_obj_by_year(
         file_abs_path: Path
-) -> NDArray[vort_measurement]:
+) -> NDArray[VortMeasurement]:
     """
-    Turns data in a json file into a numpy array of vort_measurement objects
+    Turns data in a json file into a numpy array of VortMeasurement objects
 
     Parameters
     ----------
@@ -45,31 +45,31 @@ def gen_vort_obj_by_year(
 
     Returns
     -------
-    numpy array of vort_measurement objects
+    numpy array of VortMeasurement objects
     """
 
     with open(file_abs_path, 'r') as f:
         data_dict = json.load(f)
 
     vort_yearly = np.array(
-        [vort_measurement(vort_dict, iso_time_str)
-        for iso_time_str, vort_list in data_dict.items()
-        for vort_dict in vort_list]
+        [VortMeasurement(vort_dict, iso_time_str)
+         for iso_time_str, vort_list in data_dict.items()
+         for vort_dict in vort_list]
     )
 
     return vort_yearly
 
 
-def json_to_list() -> NDArray[vort_measurement]:
+def json_to_list() -> NDArray[VortMeasurement]:
     """
-       Turns data in several json files into a single numpy array of vort_measurement objects
+       Turns data in several json files into a single numpy array of VortMeasurement objects
 
        Parameters
        ----------
 
        Returns
        -------
-       numpy array of vort_measurement objects
+       numpy array of VortMeasurement objects
        """
 
     json_files = list(main_runparams_cls.json_out_dir.glob('*vorticity.json'))  # list of all json files

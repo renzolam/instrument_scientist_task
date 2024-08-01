@@ -1,3 +1,17 @@
+"""
+Author        : Pak Yin (Renzo) Lam
+                British Antarctic Survey
+                paklam@bas.ac.uk
+
+Date Created  : 2024-08-01
+Last Modified : 2024-08-01
+
+Summary       : Class for holding a vorticity datapoint at a specified time and location
+
+List of classes:
+- vort_measurement
+"""
+
 import logging
 from datetime import datetime, timedelta, timezone
 
@@ -8,7 +22,7 @@ logger = logging.getLogger(__name__)
 log_utils.set_logger(logger)
 
 
-class vort_measurement:
+class VortMeasurement:
 
     r1_b1: float
     r1_b2: float
