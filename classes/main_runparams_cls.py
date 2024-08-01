@@ -30,7 +30,6 @@ class MainRunParams:
 
     abs_data_file_path: Path  # The absolute path of the downloaded data file
     output_dir: Path  # Where all the generated files go to
-    log_dir: Path  # Where the logs go to
 
     def __init__(self):
 
@@ -68,5 +67,6 @@ class MainRunParams:
 
                 setattr(self, attr, attr_2_set)
 
-        # Set up the destinations of other directories needed
-        self.log_dir = self.output_dir / "logs"
+
+# Set up the name of log file
+log_abs_path = MainRunParams().output_dir / "logs" / f"SWIS_task_{datetime.now(timezone.utc): %Y%m%d_%H%M}_UT.log"
