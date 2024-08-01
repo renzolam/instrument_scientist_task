@@ -42,7 +42,8 @@ if __name__ == "__main__":
     else:
         pass
 
-    vort_list = read_data.json_to_list()
-    logger.info(f'Memory occupied by all vorticity data is {getsizeof(vort_list) / 1e6} MB')
+    # Store all data in 1 numpy array
+    vort_array = read_data.json_to_array()
+    logger.info(f'Memory occupied by all vorticity data is {getsizeof(vort_array) / 1e6} MB')
 
     logger.info(f'The run took {(time() - t_start) / 60:.2f} minutes in total')

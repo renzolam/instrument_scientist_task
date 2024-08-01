@@ -10,7 +10,7 @@ Summary       : Reads in json files and store them in a numpy array of custom ob
 
 List of functions:
 - gen_vort_obj_by_year
-- json_to_list
+- json_to_array
 """
 
 
@@ -60,7 +60,7 @@ def gen_vort_obj_by_year(
     return vort_yearly
 
 
-def json_to_list() -> NDArray[VortMeasurement]:
+def json_to_array() -> NDArray[VortMeasurement]:
     """
        Turns data in several json files into a single numpy array of VortMeasurement objects
 
