@@ -1,3 +1,19 @@
+"""
+Author        : Pak Yin (Renzo) Lam
+                British Antarctic Survey
+                paklam@bas.ac.uk
+
+Date Created  : 2024-08-01
+Last Modified : 2024-08-01
+
+Summary       : Reads in json files and store them in a numpy array of custom objects
+
+List of functions:
+- gen_vort_obj_by_year
+- json_to_list
+"""
+
+
 import logging
 import json
 from pathlib import Path
@@ -19,6 +35,18 @@ log_utils.set_logger(logger)
 def gen_vort_obj_by_year(
         file_abs_path: Path
 ) -> NDArray[vort_measurement]:
+    """
+    Turns data in a json file into a numpy array of vort_measurement objects
+
+    Parameters
+    ----------
+    file_abs_path: Path
+        Absolute path to json file containing data for a certain year
+
+    Returns
+    -------
+    numpy array of vort_measurement objects
+    """
 
     with open(file_abs_path, 'r') as f:
         data_dict = json.load(f)
@@ -33,6 +61,16 @@ def gen_vort_obj_by_year(
 
 
 def json_to_list() -> NDArray[vort_measurement]:
+    """
+       Turns data in several json files into a single numpy array of vort_measurement objects
+
+       Parameters
+       ----------
+
+       Returns
+       -------
+       numpy array of vort_measurement objects
+       """
 
     json_files = list(main_runparams_cls.json_out_dir.glob('*vorticity.json'))  # list of all json files
 

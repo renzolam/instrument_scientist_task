@@ -4,7 +4,7 @@ Author        : Pak Yin (Renzo) Lam
                 paklam@bas.ac.uk
 
 Date Created  : 2024-07-31
-Last Modified : 2024-07-31
+Last Modified : 2024-08-01
 
 Summary       : Main module for the analysis
 """
@@ -29,7 +29,9 @@ if __name__ == "__main__":
 
     t_start = time()
     ############################
-    # file_conversion.data_to_json(main_runparams)
+
+    if not main_runparams.use_existing_json_data:
+        file_conversion.data_to_json(main_runparams)
 
     vort_list = read_data.json_to_list()
     logger.info(f'Memory occupied by all vorticity data is {getsizeof(vort_list) / 1e6} MB')
