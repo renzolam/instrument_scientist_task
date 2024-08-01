@@ -11,9 +11,11 @@ Summary       : Main module for the analysis
 
 import logging
 from time import time
+from sys import getsizeof
 
 from classes import main_runparams_cls
 from common_utils import log_utils
+import read_data
 import file_conversion
 
 
@@ -27,6 +29,9 @@ if __name__ == "__main__":
 
     t_start = time()
     ############################
-    file_conversion.data_to_json(main_runparams)
+    # file_conversion.data_to_json(main_runparams)
+
+    vort_list = read_data.json_to_list()
+    logger.info(f'Memory occupied by all vorticity data is {getsizeof(vort_list) / 1e6} MB')
 
     logger.info(f'The run took {(time() - t_start) / 60:.2f} minutes in total')

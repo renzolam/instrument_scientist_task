@@ -51,11 +51,7 @@ class MainRunParams:
 
                     # Create directory if it does not exist
                     if not attr_2_set.exists() and attr.endswith("dir"):
-
-                        try:
-                            attr_2_set.mkdir(parents=True)
-                        except Exception as e:
-                            logger.exception(e)
+                        attr_2_set.mkdir(parents=True)
                     else:
                         pass
 
