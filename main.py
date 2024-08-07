@@ -54,6 +54,10 @@ if __name__ == "__main__":
 
         logger.info(f'Memory occupied by all vorticity data is {getsizeof(vort_array) / 1e6} MB')
 
+        ###################################
+        # Produce plot for map of mean and median values
+
+
     except Exception as e:
         logger.exception(e)
 
