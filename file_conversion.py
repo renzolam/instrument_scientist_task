@@ -149,12 +149,15 @@ def data_to_json(
     # Saving data to separate json files
     for year in list(data.keys()):
 
-        with open(json_out_dir / f'{year}_vorticity.json', 'w') as f:
+        out_json_path = json_out_dir / f'{year}_vorticity.json'
+
+        with open(out_json_path, 'w') as f:
             json.dump(
                 data[year],
                 f,
                 indent=4
             )
+        logger.info(f'{out_json_path.name} saved to {str(out_json_path.parent)}')
 
     logger.info(f'Converting data file into json files took {(time() - t_start) / 60:.2f} minute(s)')
 

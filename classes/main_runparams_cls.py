@@ -4,7 +4,7 @@ Author        : Pak Yin (Renzo) Lam
                 paklam@bas.ac.uk
 
 Date Created  : 2024-07-31
-Last Modified : 2024-07-31
+Last Modified : 2024-08-01
 
 Summary       : Class for holding data of the parameters of the run
 
@@ -29,6 +29,11 @@ class MainRunParams:
     abs_data_file_path: Path  # The absolute path of the downloaded data file
     output_dir: Path  # Where all the generated files go to
 
+    # Whether to use the json files which have been converted from the original txt file
+    # If false, will re-run the function where the txt file will be converted into a series of json files
+    use_existing_json_data: bool
+
+
     def __init__(self):
 
         json_path = Path(__file__).parent.parent / "runparams" / "main_runparams.json"
@@ -51,11 +56,7 @@ class MainRunParams:
 
                     # Create directory if it does not exist
                     if not attr_2_set.exists() and attr.endswith("dir"):
-
-                        try:
-                            attr_2_set.mkdir(parents=True)
-                        except Exception as e:
-                            logger.exception(e)
+                        attr_2_set.mkdir(parents=True)
                     else:
                         pass
 
