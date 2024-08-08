@@ -4,6 +4,7 @@ from typing import Tuple, Union
 from copy import deepcopy, copy
 
 import matplotlib.pyplot as plt
+from matplotlib import colors
 from matplotlib import axes
 from matplotlib.collections import QuadMesh
 import numpy as np
@@ -151,9 +152,9 @@ def plot(
 
         return None
 
-    def _vort_formatting(
+    def _ax_formatting(
             ax_to_set: axes,
-            plot: QuadMesh,
+            plot_to_format: QuadMesh,
             plot_type: str
     ) -> None:
         """
@@ -163,48 +164,99 @@ def plot(
         -------
 
         """
+
+        # Initialisation
         ax = copy(ax_to_set)
 
+        assert plot_type in ('mean', 'median', 'count')
+
+        label_dict = {
+            'mean': 'Vorticity (mHz)',
+            'median': 'Vorticity (mHz)',
+            'count': 'Number of Data Points'
+        }
+
+        ticks_dict = {
+            'mean': np.arange(-3.0, 3.5, 0.5),
+            'median': np.arange(-3.0, 3.5, 0.5),
+            'count': None
+        }
+
+        ####################
+        # Does the formatting
+
         fig.colorbar(
-            plot,
+            plot_to_format,
             ax=ax,
             location='top',
             orientation='horizontal',
             fraction=0.15,
             pad=0.15,
-            ticks=np.arange(-3.0, 3.5, 0.5),
-            label='Vorticity (mHz)'
+            ticks=ticks_dict[plot_type],
+            label=label_dict[plot_type]
         )
 
         return None
 
-    def _plot_vort(
+    def _plot_subplot(
             ax_to_plot: axes,
             data: NDArray,
             plot_type: str,
             vort_cbar_step: float = 0.5
     ) -> None:
 
-        assert plot_type in ('mean', 'median')
+        # Initialisation
+        assert plot_type in ('mean', 'median', 'count')
 
         ax = copy(ax_to_plot)
 
-        all_mean_and_median = np.concatenate((means.flatten(), medians.flatten()))
-        data_min = np.nanmin(all_mean_and_median)
-        data_max = np.nanmax(all_mean_and_median)
+        colour_map_dict = {
+            'mean': 'plasma',
+            'median': 'plasma',
+            'count': 'jet'
+        }
 
-        plot_cbar_min = data_min - (data_min % vort_cbar_step)
-        plot_cbar_max = data_max - (data_max % vort_cbar_step) + vort_cbar_step
+        # Normalise data for the colorbar if needed
+        if plot_type in ('mean', 'median'):
+            all_mean_and_median = np.concatenate((means.flatten(), medians.flatten()))
+            data_min = np.nanmin(all_mean_and_median)
+            data_max = np.nanmax(all_mean_and_median)
 
-        vort_plot = ax.pcolormesh(
+            plot_cbar_min = data_min - (data_min % vort_cbar_step)
+            plot_cbar_max = data_max - (data_max % vort_cbar_step) + vort_cbar_step
+
+            norm = colors.Normalize(vmin=plot_cbar_min, vmax=plot_cbar_max)
+        elif plot_type == 'count':
+            plot_cbar_min = np.power(
+                10,
+                np.floor(
+                    np.log10(
+                        np.nanmin(counts)
+                    )
+                )
+            )
+            plot_cbar_max = np.power(
+                10,
+                np.ceil(
+                    np.log10(
+                        np.nanmax(counts)
+                    )
+                )
+            )
+
+            norm = colors.LogNorm(vmin=plot_cbar_min, vmax=plot_cbar_max)
+        else:
+            raise ValueError(f'Plot_type {plot_type} not recognized')
+        #########################
+        # Actual plotting
+        plot = ax.pcolormesh(
             *np.meshgrid(phi_edges, theta_edges),
             data.T,
-            cmap='plasma',
-            vmin=plot_cbar_min,
-            vmax=plot_cbar_max
+            cmap=colour_map_dict[plot_type],
+            norm=norm
         )
         _common_formatting(ax)
-        _vort_formatting(ax, vort_plot, plot_type)
+        _ax_formatting(ax, plot, plot_type)
 
         return None
 
@@ -258,6 +310,8 @@ def plot(
         for stat in ('mean', 'median', 'count')
     ]
 
+    assert not np.isnan(counts).any()  # Assert there aren't any invalid values in the counts
+
     # Do not plot bins with fewer counts than a threshold (100 by default)
     means[counts < count_cutoff] = np.nan
     medians[counts < count_cutoff] = np.nan
@@ -271,8 +325,9 @@ def plot(
     mean_ax, median_ax, count_ax = axs
 
     # Plots the data
-    _plot_vort(mean_ax, means, plot_type='mean')
-    _plot_vort(median_ax, medians, plot_type='median')
+    _plot_subplot(mean_ax, means, plot_type='mean')
+    _plot_subplot(median_ax, medians, plot_type='median')
+    _plot_subplot(count_ax, counts, plot_type='count')
 
     plt.show()
 
