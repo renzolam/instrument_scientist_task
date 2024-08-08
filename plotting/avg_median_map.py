@@ -211,8 +211,8 @@ def plot(
         ax = copy(ax_to_plot)
 
         colour_map_dict = {
-            'mean': 'plasma',
-            'median': 'plasma',
+            'mean': 'jet',
+            'median': 'jet',
             'count': 'jet'
         }
 
