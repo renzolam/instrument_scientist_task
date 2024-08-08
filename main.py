@@ -16,14 +16,17 @@ from sys import getsizeof, exit
 import numpy as np
 
 from classes import main_runparams_cls
+from classes.map_params_cls import MapParams
 from common_utils import log_utils
 import read_data
 import file_conversion
+from plotting import avg_median_map
 
 if __name__ == "__main__":
 
     # Initialisation
     main_runparams = main_runparams_cls.MainRunParams()
+    map_params = MapParams()
 
     logger = logging.getLogger(__name__)
     log_utils.set_logger(logger)
@@ -46,17 +49,17 @@ if __name__ == "__main__":
         vort_array = read_data.json_to_array()
 
         # Ensure all data has been read in
-        if np.isnan(vort_array).any():
-            logger.exception('There was a problem reading in the json files. See log file for details.')
-            exit()
-        else:
-            pass
+        # if np.isnan(vort_array).any():
+        #     logger.exception('There was a problem reading in the json files. See log file for details.')
+        #     exit()
+        # else:
+        #     pass
 
         logger.info(f'Memory occupied by all vorticity data is {getsizeof(vort_array) / 1e6} MB')
 
         ###################################
         # Produce plot for map of mean and median values
-
+        avg_median_map.plot(map_params, vort_array)
 
     except Exception as e:
         logger.exception(e)
