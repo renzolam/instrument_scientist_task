@@ -4,9 +4,9 @@ from typing import Tuple, Union
 from copy import deepcopy, copy
 
 import matplotlib.pyplot as plt
-from matplotlib import axes
 import numpy as np
 from numpy.typing import NDArray
+from scipy.stats import binned_statistic_2d
 
 from common_utils import log_utils
 from classes.map_params_cls import MapParams
@@ -206,9 +206,18 @@ def plot(
     ####################
     # Does the calculations
 
-    means = (np.histogram2d(phi_coords, theta_coords, bins=(phi_edges, theta_edges), weights=vort_data)[0]
-             / np.histogram2d(phi_coords, theta_coords, bins=(phi_edges, theta_edges))[0])
+    means, median, counts = [
+        binned_statistic_2d(
+            phi_coords,
+            theta_coords,
+            vort_data,
+            statistic=stat,
+            bins=(phi_edges, theta_edges)
+        ).statistic
+        for stat in ('mean', 'median', 'count')
+    ]
 
+    counts[counts == 0] = np.nan  # Do not plot bins that have 0 counts
     ####################
     # Plots the plot
 
