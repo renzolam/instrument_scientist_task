@@ -20,7 +20,7 @@ from classes.map_params_cls import MapParams
 from common_utils import log_utils
 import read_data
 import file_conversion
-from plotting import avg_median_map
+from plotting import plot_all
 
 if __name__ == "__main__":
 
@@ -59,7 +59,7 @@ if __name__ == "__main__":
 
         ###################################
         # Produce plot for map of mean and median values
-        avg_median_map.plot(main_params, map_params, vort_array)
+        avg_median_map.plot_mean_median_counts(main_params, map_params, vort_array)
 
     except Exception as e:
         logger.exception(e)

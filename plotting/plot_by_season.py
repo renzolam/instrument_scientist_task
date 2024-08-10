@@ -13,7 +13,7 @@ List of functions:
 - mlt_to_phi
 - lat_to_theta
 - theta_to_lat
-- plot
+- plot_mean_median_counts
 """
 
 import logging
@@ -21,7 +21,6 @@ from typing import Tuple, Union
 from copy import deepcopy, copy
 
 import matplotlib.pyplot as plt
-
 from matplotlib import colors
 from matplotlib import axes
 from matplotlib.collections import QuadMesh
@@ -32,6 +31,7 @@ from scipy.stats import binned_statistic_2d
 from common_utils import log_utils
 from classes.map_params_cls import MapParams
 from classes.main_runparams_cls import MainRunParams
+from classes.data_class import VortMeasurement
 
 logger = logging.getLogger(__name__)
 log_utils.set_logger(logger)
@@ -105,7 +105,7 @@ def theta_to_lat(theta: Union[NDArray, float]) -> Union[NDArray, float]:
     return lat
 
 
-def plot(
+def plot_mean_median_counts(
         main_params: MainRunParams,
         map_params: MapParams,
         vort_array: NDArray,

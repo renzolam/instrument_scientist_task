@@ -52,11 +52,11 @@ class VortMeasurement:
     aacgm_lat_4: float
     aacgm_long_4: float
 
-    timestamp: datetime
+    utc_time: datetime
 
     def __init__(self, datapoint: dict, iso_time_str: str):
 
         for key, value in datapoint.items():
             setattr(self, key, value)
 
-        self.timestamp = datetime.fromisoformat(iso_time_str).replace(tzinfo=timezone.utc)
+        self.utc_time = datetime.fromisoformat(iso_time_str).replace(tzinfo=timezone.utc)
