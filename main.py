@@ -11,9 +11,7 @@ Summary       : Main module for the analysis
 
 import logging
 from time import time
-from sys import getsizeof, exit
-
-import numpy as np
+from sys import getsizeof
 
 from classes import main_runparams_cls
 from classes.map_params_cls import MapParams
@@ -21,6 +19,7 @@ from common_utils import log_utils
 import read_data
 import file_conversion
 from plotting import plot_all
+import season_analysis
 
 if __name__ == "__main__":
 
@@ -46,7 +45,7 @@ if __name__ == "__main__":
             pass
 
         # Store all data in 1 numpy array
-        vort_array = read_data.json_to_array()
+        all_vort = read_data.json_to_array()
 
         # Ensure all data has been read in
         # if np.isnan(vort_array).any():
@@ -55,11 +54,13 @@ if __name__ == "__main__":
         # else:
         #     pass
 
-        logger.info(f'Memory occupied by all vorticity data is {getsizeof(vort_array) / 1e6} MB')
+        logger.info(f'Memory occupied by all vorticity data is {getsizeof(all_vort) / 1e6} MB')
+
+        winter_data, spring_data, summer_data, autumn_data = season_analysis.separate_by_seasons(all_vort)
 
         ###################################
         # Produce plot for map of mean and median values
-        avg_median_map.plot_mean_median_counts(main_params, map_params, vort_array)
+        plot_all.plot_mean_median_counts(main_params, map_params, all_vort)
 
     except Exception as e:
         logger.exception(e)
