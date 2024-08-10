@@ -4,6 +4,7 @@ from typing import Tuple, Union
 from copy import deepcopy, copy
 
 import matplotlib.pyplot as plt
+from mpl_toolkits.axes_grid1 import make_axes_locatable
 from matplotlib import colors
 from matplotlib import axes
 from matplotlib.collections import QuadMesh
@@ -120,6 +121,8 @@ def plot(
         Coordinate system to be used for the latitude. Only accepts AACGM or GEO
     count_cutoff: int
         Bins with fewer data points than this cutoff will not be plotted
+    fontsize: float
+        Size of most words which appear on the plot
 
     Returns
     -------
@@ -187,8 +190,8 @@ def plot(
         assert plot_type in ('mean', 'median', 'count')
 
         label_dict = {
-            'mean': 'Vorticity (mHz)',
-            'median': 'Vorticity (mHz)',
+            'mean': 'Mean Vorticity (mHz)',
+            'median': 'Median Vorticity (mHz)',
             'count': 'Number of Data Points'
         }
 
@@ -198,12 +201,6 @@ def plot(
             'count': np.power(10, range(0, 10))
         }
 
-        subtitle_dict = {
-            'mean': 'Mean Vorticity',
-            'median': 'Median Vorticity',
-            'count': 'Number of Data Points'
-        }
-
         ####################
         # Does the formatting
 
@@ -211,17 +208,24 @@ def plot(
         cbar = fig.colorbar(
             plot_to_format,
             ax=ax,
-            location='top',
             orientation='horizontal',
-            fraction=0.15,
-            pad=0.15,
+            location='top',
+            aspect=15,
             ticks=ticks_dict[plot_type]
         )
         cbar.ax.tick_params(labelsize=fontsize)
-        cbar.ax.set_title(label_dict[plot_type], fontsize=fontsize)
+        cbar.ax.set_title(label_dict[plot_type], fontsize=fontsize, pad=fontsize)
 
-        # For the titles of the subplots
-        ax.set_title(subtitle_dict[plot_type], fontsize=fontsize)
+        # Label for radial axis
+        label_position = ax.get_rlabel_position()
+        ax.text(
+            np.radians(label_position + 10),
+            ax.get_rmax() * 1.1,
+            f'{coord.upper()} Latitude',
+            ha='left',
+            va='top',
+            fontsize=fontsize
+        )
 
         return None
 
@@ -243,7 +247,7 @@ def plot(
             fontsize=fontsize,
             horizontalalignment='center',
             verticalalignment='center',
-            position=(0.5, 1.1)
+            position=(0.45, 0.9)
         )
 
         return None
@@ -371,7 +375,8 @@ def plot(
     ####################
     # Setting up the plotting routine
 
-    fig, axs = plt.subplots(1, 3, figsize=(36, 12), subplot_kw={'projection': 'polar'})
+    fig, axs = plt.subplots(1, 3, figsize=(36, 21),
+                            subplot_kw={'projection': 'polar'})
     mean_ax, median_ax, count_ax = axs
 
     # Plots the data
@@ -387,6 +392,7 @@ def plot(
     plot_dir = main_params.output_dir / 'plots'
     if not plot_dir.exists():
         plot_dir.mkdir(parents=True)
+
     plt.savefig(
         plot_dir / 'avg_median_counts_(all_data).png',
         bbox_inches="tight"
