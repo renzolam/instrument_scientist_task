@@ -13,6 +13,8 @@ from scipy.stats import binned_statistic_2d
 
 from common_utils import log_utils
 from classes.map_params_cls import MapParams
+from classes.main_runparams_cls import MainRunParams
+from classes.data_class import VortMeasurement
 
 logger = logging.getLogger(__name__)
 log_utils.set_logger(logger)
@@ -87,6 +89,7 @@ def theta_to_lat(theta: Union[NDArray, float]) -> Union[NDArray, float]:
 
 
 def plot(
+        main_params: MainRunParams,
         map_params: MapParams,
         vort_array: NDArray,
         coord: str = 'aacgm',
@@ -105,9 +108,17 @@ def plot(
 
     Parameters
     ----------
-    map_params
-    vort_array
-    coord
+
+    main_params: MainRunParams
+        Used here to get location of where the plot should be saved to
+    map_params: MapParams
+        Used here for knowing the bin sizes to use for the plot
+    vort_array: List[VortMeasurement]
+        List of VortMeasurement objects, each of which contain data for a measurement made
+    coord: str
+        Coordinate system to be used for the latitude. Only accepts AACGM or GEO
+    count_cutoff: int
+        Bins with fewer data points than this cutoff will not be plotted
 
     Returns
     -------
@@ -329,6 +340,7 @@ def plot(
     _plot_subplot(median_ax, medians, plot_type='median')
     _plot_subplot(count_ax, counts, plot_type='count')
 
-    plt.show()
+    # Saving the file
+    plt.savefig(main_params.output_dir / 'plots' / 'avg_median_counts_(all_data).png')
 
     return None

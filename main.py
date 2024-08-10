@@ -25,7 +25,7 @@ from plotting import avg_median_map
 if __name__ == "__main__":
 
     # Initialisation
-    main_runparams = main_runparams_cls.MainRunParams()
+    main_params = main_runparams_cls.MainRunParams()
     map_params = MapParams()
 
     logger = logging.getLogger(__name__)
@@ -38,10 +38,10 @@ if __name__ == "__main__":
 
         # Convert original txt data file into json files, if explicitly told to do so,
         # or there aren't any json files in the directory
-        if (not main_runparams.use_existing_json_data
+        if (not main_params.use_existing_json_data
                 or len(list(main_runparams_cls.json_out_dir.glob('*vorticity.json'))) == 0):
 
-            file_conversion.data_to_json(main_runparams)
+            file_conversion.data_to_json(main_params)
         else:
             pass
 
@@ -59,7 +59,7 @@ if __name__ == "__main__":
 
         ###################################
         # Produce plot for map of mean and median values
-        avg_median_map.plot(map_params, vort_array)
+        avg_median_map.plot(main_params, map_params, vort_array)
 
     except Exception as e:
         logger.exception(e)
