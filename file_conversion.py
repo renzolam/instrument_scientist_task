@@ -7,6 +7,9 @@ Date Created  : 2024-08-01
 Last Modified : 2024-08-01
 
 Summary       : Helps store data in different file formats
+
+List of functions:
+- data_to_json
 """
 
 import logging
@@ -162,6 +165,3 @@ def data_to_json(
     logger.info(f'Converting data file into json files took {(time() - t_start) / 60:.2f} minute(s)')
 
     return None
-
-
-

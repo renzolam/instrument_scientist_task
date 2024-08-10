@@ -1,10 +1,27 @@
+"""
+Author        : Pak Yin (Renzo) Lam
+                British Antarctic Survey
+                paklam@bas.ac.uk
+
+Date Created  : 2024-08-10
+Last Modified : 2024-08-10
+
+Summary       : Plots the plots required
+
+List of functions:
+- create_bin_edges
+- mlt_to_phi
+- lat_to_theta
+- theta_to_lat
+- plot
+"""
+
 import logging
-from pathlib import Path
 from typing import Tuple, Union
 from copy import deepcopy, copy
 
 import matplotlib.pyplot as plt
-from mpl_toolkits.axes_grid1 import make_axes_locatable
+
 from matplotlib import colors
 from matplotlib import axes
 from matplotlib.collections import QuadMesh
@@ -15,7 +32,6 @@ from scipy.stats import binned_statistic_2d
 from common_utils import log_utils
 from classes.map_params_cls import MapParams
 from classes.main_runparams_cls import MainRunParams
-from classes.data_class import VortMeasurement
 
 logger = logging.getLogger(__name__)
 log_utils.set_logger(logger)
