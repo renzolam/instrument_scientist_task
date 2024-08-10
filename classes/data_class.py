@@ -4,19 +4,20 @@ Author        : Pak Yin (Renzo) Lam
                 paklam@bas.ac.uk
 
 Date Created  : 2024-08-01
-Last Modified : 2024-08-01
+Last Modified : 2024-08-10
 
 Summary       : Class for holding a vorticity datapoint at a specified time and location
 
 List of classes:
-- vort_measurement
+- VortMeasurement
 """
 
 import logging
 from datetime import datetime, timedelta, timezone
 
+import numpy as np
+
 from common_utils import log_utils
-from classes import main_runparams_cls
 
 logger = logging.getLogger(__name__)
 log_utils.set_logger(logger)
@@ -57,6 +58,22 @@ class VortMeasurement:
     def __init__(self, datapoint: dict, iso_time_str: str):
 
         for key, value in datapoint.items():
+
+            # Filters out invalid values
+            if key == 'vorticity_mHz' and (not (-1e3 < value < 1e3)):
+                value = np.nan
+            elif key == 'MLT' and (not (0 <= value <= 24)):
+                value = np.nan
+            elif '_long_' in key and (not (-180 <= value <= 180)):
+                value = np.nan
+            elif '_lat_' in key and (not (-90 <= value <= 90)):
+                value = np.nan
+            else:
+                pass
+
             setattr(self, key, value)
 
         self.utc_time = datetime.fromisoformat(iso_time_str).replace(tzinfo=timezone.utc)
+
+
+
