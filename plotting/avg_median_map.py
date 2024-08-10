@@ -93,7 +93,8 @@ def plot(
         map_params: MapParams,
         vort_array: NDArray,
         coord: str = 'aacgm',
-        count_cutoff: int = 100
+        count_cutoff: int = 100,
+        fontsize=40
 ):
     """
 
@@ -132,26 +133,30 @@ def plot(
 
         ax = copy(ax_to_set)
 
-        ## Rotate plot to match conventional MLT representation
+        # Rotate plot to match conventional MLT representation
         ax.set_theta_zero_location('S')
 
-        ## Set lim in radial direction
+        # Set lim in radial direction
         max_theta_for_plot = max_theta - (max_theta % 5) + 5
         ax.set_rlim(0, max_theta_for_plot)
 
-        ## Ticks
+        # Ticks
 
         # Ticks in MLT
-        ax.set_xticklabels(['00\nMLT', '', '06\nMLT', '', '12\nMLT', '', '18\nMLT', ''])
+        ax.set_xticklabels(
+            ['00\nMLT', '', '06\nMLT', '', '12\nMLT', '', '18\nMLT', ''],
+            fontsize=fontsize
+        )
 
         # Ticks in latitude
         r_ticks = np.arange(0, max_theta_for_plot + 5, 5)
         ax.set_yticks(r_ticks)
-        ax.set_yticklabels([
-            int(lat) for lat in theta_to_lat(r_ticks)
-        ])
+        ax.set_yticklabels(
+            [int(lat) for lat in theta_to_lat(r_ticks)],
+            fontsize=fontsize
+        )
 
-        ## Set grid lines
+        # Set grid lines
         ax.grid(
             visible=True,
             which='both',
@@ -190,21 +195,55 @@ def plot(
         ticks_dict = {
             'mean': np.arange(-3.0, 3.5, 0.5),
             'median': np.arange(-3.0, 3.5, 0.5),
-            'count': None
+            'count': np.power(10, range(0, 10))
+        }
+
+        subtitle_dict = {
+            'mean': 'Mean Vorticity',
+            'median': 'Median Vorticity',
+            'count': 'Number of Data Points'
         }
 
         ####################
         # Does the formatting
 
-        fig.colorbar(
+        # For the colorbar
+        cbar = fig.colorbar(
             plot_to_format,
             ax=ax,
             location='top',
             orientation='horizontal',
             fraction=0.15,
             pad=0.15,
-            ticks=ticks_dict[plot_type],
-            label=label_dict[plot_type]
+            ticks=ticks_dict[plot_type]
+        )
+        cbar.ax.tick_params(labelsize=fontsize)
+        cbar.ax.set_title(label_dict[plot_type], fontsize=fontsize)
+
+        # For the titles of the subplots
+        ax.set_title(subtitle_dict[plot_type], fontsize=fontsize)
+
+        return None
+
+    def _fig_formatting() -> None:
+        """
+        Does formatting that is not specific to any subplot
+        Returns
+        -------
+
+        """
+
+        fig.suptitle(
+            """
+            Mean, Median, and Number of Data Points 
+            for Vorticity Measurements
+            of the Northern Hemisphere
+            Made between 2000 and 2005
+            """,
+            fontsize=fontsize,
+            horizontalalignment='center',
+            verticalalignment='center',
+            position=(0.5, 1.1)
         )
 
         return None
@@ -340,7 +379,17 @@ def plot(
     _plot_subplot(median_ax, medians, plot_type='median')
     _plot_subplot(count_ax, counts, plot_type='count')
 
+    # Does more formatting
+    _fig_formatting()
+    fig.tight_layout()
+
     # Saving the file
-    plt.savefig(main_params.output_dir / 'plots' / 'avg_median_counts_(all_data).png')
+    plot_dir = main_params.output_dir / 'plots'
+    if not plot_dir.exists():
+        plot_dir.mkdir(parents=True)
+    plt.savefig(
+        plot_dir / 'avg_median_counts_(all_data).png',
+        bbox_inches="tight"
+    )
 
     return None
