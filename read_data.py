@@ -70,7 +70,7 @@ def gen_vort_obj_by_year(
         return np.array([np.nan])
 
 
-def json_to_array() -> NDArray[Union[VortMeasurement, None]]:
+def json_to_array() -> NDArray:
     """
        Turns data in several json files into a single numpy array of VortMeasurement objects
 
@@ -82,7 +82,9 @@ def json_to_array() -> NDArray[Union[VortMeasurement, None]]:
        numpy array of VortMeasurement objects, or None if the reading process failed
        """
 
-    json_files = list(main_runparams_cls.json_out_dir.glob('*vorticity.json'))  # list of all json files
+    json_files = sorted(
+        list(main_runparams_cls.json_out_dir.glob('*vorticity.json'))
+    )  # list of all json files
 
     t_read_start = time()
     ray.init()
