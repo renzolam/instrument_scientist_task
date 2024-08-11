@@ -77,4 +77,4 @@ def separate_by_seasons(
     summer_data = np.concatenate(summer_data)
     autumn_data = np.concatenate(autumn_data)
 
-    return winter_data, spring_data, summer_data, autumn_data
+    return spring_data, summer_data, autumn_data, winter_data

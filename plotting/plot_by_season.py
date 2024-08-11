@@ -17,7 +17,7 @@ List of functions:
 """
 
 import logging
-from typing import Tuple, Union
+from typing import Tuple, Union, List
 from copy import deepcopy, copy
 
 import matplotlib.pyplot as plt
@@ -108,7 +108,10 @@ def theta_to_lat(theta: Union[NDArray, float]) -> Union[NDArray, float]:
 def plot_mean_median_counts(
         main_params: MainRunParams,
         map_params: MapParams,
-        vort_array: NDArray,
+        spring_data: NDArray,
+        summer_data: NDArray,
+        autumn_data: NDArray,
+        winter_data: NDArray,
         coord: str = 'aacgm',
         count_cutoff: int = 100,
         fontsize=40
@@ -268,65 +271,107 @@ def plot_mean_median_counts(
 
         return None
 
-    def _plot_subplot(
-            ax_to_plot: axes,
-            data: NDArray,
-            plot_type: str,
-            vort_cbar_step: float = 0.5
+    def _plot_1_season(
+            row_axs: NDArray
     ) -> None:
 
-        # Initialisation
-        assert plot_type in ('mean', 'median', 'count')
+        def __plot_subplot(
+                ax_to_plot: axes,
+                data: NDArray,
+                plot_type: str,
+                vort_cbar_step: float = 0.5
+        ) -> None:
 
-        ax = copy(ax_to_plot)
+            # Initialisation
+            assert plot_type in ('mean', 'median', 'count')
 
-        colour_map_dict = {
-            'mean': 'jet',
-            'median': 'jet',
-            'count': 'jet'
-        }
+            ax = copy(ax_to_plot)
 
-        # Normalise data for the colorbar if needed
-        if plot_type in ('mean', 'median'):
-            all_mean_and_median = np.concatenate((means.flatten(), medians.flatten()))
-            data_min = np.nanmin(all_mean_and_median)
-            data_max = np.nanmax(all_mean_and_median)
+            colour_map_dict = {
+                'mean': 'jet',
+                'median': 'jet',
+                'count': 'jet'
+            }
 
-            plot_cbar_min = data_min - (data_min % vort_cbar_step)
-            plot_cbar_max = data_max - (data_max % vort_cbar_step) + vort_cbar_step
+            # Normalise data for the colorbar if needed
+            if plot_type in ('mean', 'median'):
+                all_mean_and_median = np.concatenate((means.flatten(), medians.flatten()))
+                data_min = np.nanmin(all_mean_and_median)
+                data_max = np.nanmax(all_mean_and_median)
 
-            norm = colors.Normalize(vmin=plot_cbar_min, vmax=plot_cbar_max)
-        elif plot_type == 'count':
-            plot_cbar_min = np.power(
-                10,
-                np.floor(
-                    np.log10(
-                        np.nanmin(counts)
+                plot_cbar_min = data_min - (data_min % vort_cbar_step)
+                plot_cbar_max = data_max - (data_max % vort_cbar_step) + vort_cbar_step
+
+                norm = colors.Normalize(vmin=plot_cbar_min, vmax=plot_cbar_max)
+            elif plot_type == 'count':
+                plot_cbar_min = np.power(
+                    10,
+                    np.floor(
+                        np.log10(
+                            np.nanmin(counts)
+                        )
                     )
                 )
-            )
-            plot_cbar_max = np.power(
-                10,
-                np.ceil(
-                    np.log10(
-                        np.nanmax(counts)
+                plot_cbar_max = np.power(
+                    10,
+                    np.ceil(
+                        np.log10(
+                            np.nanmax(counts)
+                        )
                     )
                 )
-            )
 
-            norm = colors.LogNorm(vmin=plot_cbar_min, vmax=plot_cbar_max)
-        else:
-            raise ValueError(f'Plot_type {plot_type} not recognized')
-        #########################
-        # Actual plotting
-        plot = ax.pcolormesh(
-            *np.meshgrid(phi_edges, theta_edges),
-            data.T,
-            cmap=colour_map_dict[plot_type],
-            norm=norm
+                norm = colors.LogNorm(vmin=plot_cbar_min, vmax=plot_cbar_max)
+            else:
+                raise ValueError(f'Plot_type {plot_type} not recognized')
+            #########################
+            # Actual plotting
+            plot = ax.pcolormesh(
+                *np.meshgrid(phi_edges, theta_edges),
+                data.T,
+                cmap=colour_map_dict[plot_type],
+                norm=norm
+            )
+            _common_formatting(ax)
+            _ax_formatting(ax, plot, plot_type)
+
+            return None
+
+        # Extracts data
+        phi_coords = mlt_to_phi(
+            np.array([vort_data_season.MLT for vort_data_season in season_data], dtype=float)
         )
-        _common_formatting(ax)
-        _ax_formatting(ax, plot, plot_type)
+        theta_coords = lat_to_theta(
+            np.array([getattr(vort_data_season, f'{coord}_lat_c') for vort_data_season in season_data], dtype=float)
+        )
+        season_vort = np.array([vort_data_season.vorticity_mHz for vort_data_season in season_data], dtype=float)
+        ####################
+        # Does the calculations
+        means, medians, counts = [
+            binned_statistic_2d(
+                phi_coords,
+                theta_coords,
+                season_vort,
+                statistic=stat,
+                bins=(phi_edges, theta_edges)
+            ).statistic
+            for stat in ('mean', 'median', 'count')
+        ]
+
+        assert not np.isnan(counts).any()  # Assert there aren't any invalid values in the counts
+
+        # Do not plot bins with fewer counts than a threshold (100 by default)
+        means[counts < count_cutoff] = np.nan
+        medians[counts < count_cutoff] = np.nan
+
+        # Do not plot bins that have 0 counts
+        counts[counts == 0] = np.nan
+
+        ####################
+        # Plots the data
+        __plot_subplot(row_axs[0], means, plot_type='mean')
+        __plot_subplot(row_axs[1], medians, plot_type='median')
+        __plot_subplot(row_axs[2], counts, plot_type='count')
 
         return None
 
@@ -334,17 +379,6 @@ def plot_mean_median_counts(
         raise ValueError('Coord must be either "aacgm" or "geo"')
     else:
         pass
-
-    # Extracts data
-    phi_coords = mlt_to_phi(
-        np.array([vort_data.MLT for vort_data in vort_array])
-    )
-    theta_coords = lat_to_theta(
-        np.array([getattr(vort_data, f'{coord}_lat_c') for vort_data in vort_array])
-    )
-    vort_data = np.array(
-        [vort_measurement.vorticity_mHz for vort_measurement in vort_array]
-    )
 
     ####################
     # Creates bin edges
@@ -357,6 +391,7 @@ def plot_mean_median_counts(
     phi_edges = create_bin_edges((0, 2 * np.pi), d_phi_rad)
 
     # All edges of the bins for THETA
+    vort_array = np.concatenate([winter_data, spring_data, summer_data, autumn_data])
     min_lat = np.min(
         np.array([getattr(vort_data, f'{coord}_lat_c') for vort_data in vort_array])
     )
@@ -366,39 +401,15 @@ def plot_mean_median_counts(
     max_theta = 90 - min_lat_edge
 
     theta_edges = create_bin_edges((0, max_theta), d_theta_deg)
-    ####################
-    # Does the calculations
 
-    means, medians, counts = [
-        binned_statistic_2d(
-            phi_coords,
-            theta_coords,
-            vort_data,
-            statistic=stat,
-            bins=(phi_edges, theta_edges)
-        ).statistic
-        for stat in ('mean', 'median', 'count')
-    ]
-
-    assert not np.isnan(counts).any()  # Assert there aren't any invalid values in the counts
-
-    # Do not plot bins with fewer counts than a threshold (100 by default)
-    means[counts < count_cutoff] = np.nan
-    medians[counts < count_cutoff] = np.nan
-
-    # Do not plot bins that have 0 counts
-    counts[counts == 0] = np.nan
     ####################
     # Setting up the plotting routine
 
-    fig, axs = plt.subplots(1, 3, figsize=(36, 21),
+    fig, axs = plt.subplots(4, 3, figsize=(36, 21 * 4),
                             subplot_kw={'projection': 'polar'})
-    mean_ax, median_ax, count_ax = axs
 
-    # Plots the data
-    _plot_subplot(mean_ax, means, plot_type='mean')
-    _plot_subplot(median_ax, medians, plot_type='median')
-    _plot_subplot(count_ax, counts, plot_type='count')
+    for season_idx, season_data in enumerate((spring_data, summer_data, autumn_data, winter_data)):
+        _plot_1_season(axs[season_idx])
 
     # Does more formatting
     _fig_formatting()
@@ -410,7 +421,7 @@ def plot_mean_median_counts(
         plot_dir.mkdir(parents=True)
 
     plt.savefig(
-        plot_dir / 'avg_median_counts_(all_data).png',
+        plot_dir / 'avg_median_counts_(by_season).png',
         bbox_inches="tight"
     )
 

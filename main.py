@@ -18,7 +18,7 @@ from classes.map_params_cls import MapParams
 from common_utils import log_utils
 import read_data
 import file_conversion
-from plotting import plot_all
+from plotting import plot_all, plot_by_season
 import season_analysis
 
 if __name__ == "__main__":
@@ -56,11 +56,23 @@ if __name__ == "__main__":
 
         logger.info(f'Memory occupied by all vorticity data is {getsizeof(all_vort) / 1e6} MB')
 
-        winter_data, spring_data, summer_data, autumn_data = season_analysis.separate_by_seasons(all_vort)
+        spring_data, summer_data, autumn_data, winter_data = season_analysis.separate_by_seasons(all_vort)
 
         ###################################
         # Produce plot for map of mean and median values
-        plot_all.plot_mean_median_counts(main_params, map_params, all_vort)
+        # plot_all.plot_mean_median_counts(
+        #     main_params,
+        #     map_params,
+        #     all_vort
+        # )
+        plot_by_season.plot_mean_median_counts(
+            main_params,
+            map_params,
+            spring_data,
+            summer_data,
+            autumn_data,
+            winter_data
+        )
 
     except Exception as e:
         logger.exception(e)
