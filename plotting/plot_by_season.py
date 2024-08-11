@@ -215,8 +215,8 @@ def plot_mean_median_counts(
         }
 
         ticks_dict = {
-            'mean': np.arange(-3.0, 3.5, 0.5),
-            'median': np.arange(-3.0, 3.5, 0.5),
+            'mean': np.arange(-3.0, 3.5, 1.0),
+            'median': np.arange(-3.0, 3.5, 1.0),
             'count': np.power(10, range(0, 10))
         }
 
@@ -266,7 +266,7 @@ def plot_mean_median_counts(
             fontsize=fontsize,
             horizontalalignment='center',
             verticalalignment='center',
-            position=(0.45, 0.9)
+            position=(0.45, 1.0)
         )
 
         return None
@@ -405,7 +405,7 @@ def plot_mean_median_counts(
     ####################
     # Setting up the plotting routine
 
-    fig, axs = plt.subplots(4, 3, figsize=(36, 21 * 4),
+    fig, axs = plt.subplots(4, 3, figsize=(36, 70),
                             subplot_kw={'projection': 'polar'})
 
     for season_idx, season_data in enumerate((spring_data, summer_data, autumn_data, winter_data)):
