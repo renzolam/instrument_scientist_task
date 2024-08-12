@@ -4,7 +4,7 @@ Author        : Pak Yin (Renzo) Lam
                 paklam@bas.ac.uk
 
 Date Created  : 2024-07-31
-Last Modified : 2024-08-01
+Last Modified : 2024-08-12
 
 Summary       : Main module for the analysis
 """
@@ -19,7 +19,7 @@ from common_utils import log_utils
 from runparams import common_params
 import read_data
 import file_conversion
-from plotting import plot_all, plot_by_season
+from plotting import plot_avg_all, plot_avg_by_season
 import season_analysis
 
 if __name__ == "__main__":
@@ -57,9 +57,9 @@ if __name__ == "__main__":
 
         ###################################
         # Produce plot for map of mean and median values
-        plot_all.plot_mean_median_counts(main_params, map_params, all_vort)
+        plot_avg_all.plot_mean_median_counts(main_params, map_params, all_vort)
 
-        plot_by_season.plot_mean_median_counts(main_params, map_params, vort_by_season)
+        plot_avg_by_season.plot_mean_median_counts(main_params, map_params, vort_by_season)
 
     except Exception as e:
         logger.exception(e)
