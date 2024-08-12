@@ -1,5 +1,5 @@
 {
-  "abs_data_file_path": "/Users/loan/data_volume/Instrument Scientist/wg_v_00_05.txt",
+  "abs_data_txt_dir": "/Users/loan/data_volume/Instrument Scientist/original_txt_files",
   "output_dir": "/Users/loan/data_volume/Instrument Scientist",
-  "use_existing_json_data": true
+  "txt_files_to_json": true
 }

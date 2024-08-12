@@ -26,6 +26,7 @@ from numpy.typing import NDArray
 
 from common_utils import log_utils
 from classes import main_runparams_cls
+from runparams import common_params
 from classes.data_class import VortMeasurement
 
 logger = logging.getLogger(__name__)
@@ -83,7 +84,7 @@ def json_to_array() -> NDArray:
        """
 
     json_files = sorted(
-        list(main_runparams_cls.json_out_dir.glob('*vorticity.json'))
+        list(common_params.json_out_dir.glob('*vorticity.json'))
     )  # list of all json files
 
     t_read_start = time()

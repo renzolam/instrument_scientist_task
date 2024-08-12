@@ -4,7 +4,7 @@ Author        : Pak Yin (Renzo) Lam
                 paklam@bas.ac.uk
 
 Date Created  : 2024-07-31
-Last Modified : 2024-08-01
+Last Modified : 2024-08-12
 
 Summary       : Class for holding data of the parameters of the run
 
@@ -12,13 +12,9 @@ List of classes:
 - MainRunParams
 """
 
-import logging
 import json
 from pathlib import Path
-from datetime import datetime, timedelta, timezone
 from types import SimpleNamespace
-from typing import List
-from copy import deepcopy
 
 
 class MainRunParams:
@@ -26,13 +22,12 @@ class MainRunParams:
     Class containing all info for the run
     """
 
-    abs_data_file_path: Path  # The absolute path of the downloaded data file
+    abs_data_txt_dir: Path  # The absolute path of the downloaded data file
     output_dir: Path  # Where all the generated files go to
 
     # Whether to use the json files which have been converted from the original txt file
     # If false, will re-run the function where the txt file will be converted into a series of json files
-    use_existing_json_data: bool
-
+    txt_files_to_json: bool
 
     def __init__(self):
 
@@ -50,7 +45,7 @@ class MainRunParams:
                 attr_2_set = getattr(paramsdict, attr)
 
                 # Turns dirs and paths into 'Path' Python objects
-                if attr.endswith("dir") or attr.endswith("path"):
+                if attr.endswith("dir"):
 
                     attr_2_set = Path(attr_2_set)
 
@@ -65,13 +60,3 @@ class MainRunParams:
                     pass
 
                 setattr(self, attr, attr_2_set)
-
-
-# Set up the name of log file
-log_dir = MainRunParams().output_dir / "logs"
-if not log_dir.exists():
-    log_dir.mkdir(parents=True)
-log_abs_path = log_dir / f"SWIS_task_{datetime.now(timezone.utc):%Y%m%d_%H%M}_UT.log"
-
-# Sets up dir where data in json forms are found
-json_out_dir = MainRunParams().output_dir / 'vorticity_json'

@@ -4,7 +4,7 @@ Author        : Pak Yin (Renzo) Lam
                 paklam@bas.ac.uk
 
 Date Created  : 2024-08-01
-Last Modified : 2024-08-01
+Last Modified : 2024-08-12
 
 Summary       : Sets up loggers
 """
@@ -12,7 +12,7 @@ Summary       : Sets up loggers
 import logging
 from copy import copy
 
-from classes import main_runparams_cls
+from runparams import common_params
 
 
 def set_logger(
@@ -39,7 +39,7 @@ def set_logger(
     formatter = logging.Formatter("\n%(asctime)s - \n%(name)s line %(lineno)s - %(levelname)s: \n%(message)s")
 
     # Create a file handler to write logs to a file
-    file_handler = logging.FileHandler(main_runparams_cls.log_abs_path, mode='a+')
+    file_handler = logging.FileHandler(common_params.log_abs_path, mode='a+')
     file_handler.setLevel(logging.INFO)
     file_handler.setFormatter(formatter)
 

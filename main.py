@@ -16,6 +16,7 @@ from sys import getsizeof
 from classes import main_runparams_cls
 from classes.map_params_cls import MapParams
 from common_utils import log_utils
+from runparams import common_params
 import read_data
 import file_conversion
 from plotting import plot_all, plot_by_season
@@ -37,10 +38,8 @@ if __name__ == "__main__":
 
         # Convert original txt data file into json files, if explicitly told to do so,
         # or there aren't any json files in the directory
-        if (not main_params.use_existing_json_data
-                or len(list(main_runparams_cls.json_out_dir.glob('*vorticity.json'))) == 0):
-
-            file_conversion.data_to_json(main_params)
+        if main_params.txt_files_to_json or len(list(common_params.json_out_dir.glob('*vorticity.json'))) == 0:
+            file_conversion.all_data_to_json(main_params)
         else:
             pass
 

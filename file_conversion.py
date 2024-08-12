@@ -15,38 +15,36 @@ List of functions:
 import logging
 from datetime import datetime, timedelta, timezone
 import json
+from pathlib import Path
 from time import time
 from copy import deepcopy
 
 import numpy as np
 
 from common_utils import log_utils
-from classes import main_runparams_cls
+from runparams import common_params
+from classes.main_runparams_cls import MainRunParams
 
 logger = logging.getLogger(__name__)
 log_utils.set_logger(logger)
 
 
-def data_to_json(
-        main_params: main_runparams_cls.MainRunParams,
-):
+def convert_1_txt_to_json(
+        abs_txt_path: Path
+) -> None:
     """
+    For 1 given txt file containing vorticity data, converts it into json files separated by year
 
     Parameters
     ----------
-    main_params: main_runparams_cls.MainRunParams
-        Parameters for the run. Used here to know where the data txt file is
+    abs_txt_path: Path
+        Absolute path to txt file with vorticity data. Assumes its name has not been modified after downloading it from
+        the internet
 
     Returns
     -------
 
     """
-    # Initialisation
-
-    # Directory where the json files are going to be stored at
-    json_out_dir = deepcopy(main_runparams_cls.json_out_dir)
-    if not json_out_dir.exists():
-        json_out_dir.mkdir(parents=True)
 
     # Dictionary containing all the data
     data = {}
@@ -59,12 +57,8 @@ def data_to_json(
     aacgm_coord_keys = ['aacgm_lat_c', 'aacgm_long_c', 'aacgm_lat_1', 'aacgm_long_1', 'aacgm_lat_2', 'aacgm_long_2',
                         'aacgm_lat_3', 'aacgm_long_3', 'aacgm_lat_4', 'aacgm_long_4']
 
-    # Start of time
-    t_start = time()
-
-    ####################################
     # Opening the data txt file
-    with open(main_params.abs_data_file_path, 'r') as f:
+    with open(abs_txt_path, 'r') as f:
         lines = f.readlines()
 
         for idx, line in enumerate(lines):
@@ -94,10 +88,10 @@ def data_to_json(
 
                     elif split_line.size == 7:  # If it is a line containing data of the vorticity
 
-                        # TODO: Perhaps add a switch here from runparams
                         split_line[-2] *= -1e3  # Converting vorticity to mHz with correct sign convention
 
-                        data[record_time.year][record_time_list[-1].isoformat()].append(  # Adds a dict to the latest timestamp
+                        data[record_time.year][record_time_list[-1].isoformat()].append(
+                            # Adds a dict to the latest timestamp
                             dict(
                                 zip(vorticity_keys, split_line)
                             )
@@ -124,35 +118,34 @@ def data_to_json(
                         else:
                             logger.error(
                                 f"""
-                                This line contains an unexpected coord index:
-                                {line}
-                                """)
+                                    This line contains an unexpected coord index:
+                                    {line}
+                                    """)
 
                     elif split_line.size == 1:
                         pass
                     else:
                         logger.error(
                             f"""
-                            This line contains an unexpected number of columns ({split_line.size} columns):
-                            {line}
-                            """)
+                                This line contains an unexpected number of columns ({split_line.size} columns):
+                                {line}
+                                """)
 
                 # TODO: Better sepearte the fail conversion exception
                 except Exception as e:
                     logger.error(
                         f"""
-                        Line with non-numeric data found, when converting the data txt file into json files:
-                        {line}
-                        {e}
-                        """
+                            Line with non-numeric data found, when converting the data txt file into json files:
+                            {line}
+                            {e}
+                            """
                     )
                     pass
 
     ##################################
     # Saving data to separate json files
     for year in list(data.keys()):
-
-        out_json_path = json_out_dir / f'{year}_vorticity.json'
+        out_json_path = common_params.json_out_dir / f'{abs_txt_path.name.split("_")[0]}_{year}_vorticity.json'
 
         with open(out_json_path, 'w') as f:
             json.dump(
@@ -161,6 +154,31 @@ def data_to_json(
                 indent=4
             )
         logger.info(f'{out_json_path.name} saved to {str(out_json_path.parent)}')
+
+    return None
+
+
+def all_data_to_json(main_params: MainRunParams) -> None:
+    """
+    Converts all txt files in a directory into json files, separated by year
+
+    Returns
+    -------
+
+    """
+    # Initialisation
+
+    # Directory where the json files are going to be stored at
+    json_out_dir = deepcopy(common_params.json_out_dir)
+    if not json_out_dir.exists():
+        json_out_dir.mkdir(parents=True)
+
+    # Start of time
+    t_start = time()
+
+    ####################################
+    for abs_txt_path in list(main_params.abs_data_txt_dir.glob('*.txt')):
+        convert_1_txt_to_json(abs_txt_path)
 
     logger.info(f'Converting data file into json files took {(time() - t_start) / 60:.2f} minute(s)')
 
