@@ -30,10 +30,7 @@ logger = logging.getLogger(__name__)
 log_utils.set_logger(logger)
 
 
-def create_bin_edges(
-        lims: Tuple[float, float],
-        bin_size: float
-) -> NDArray:
+def create_bin_edges(lims: Tuple[float, float], bin_size: float) -> NDArray:
     """
     Create an array of the values of the edges of the bins
 
@@ -80,20 +77,20 @@ def mlt_to_phi(mlt: Union[NDArray, float]) -> Union[NDArray, float]:
 
 def lat_to_theta(lat: Union[NDArray, float]) -> Union[NDArray, float]:
     """
-        Converts latitude values to theta values, defined as
-        angles in DEGREES from the magnetic pole
+    Converts latitude values to theta values, defined as
+    angles in DEGREES from the magnetic pole
 
-        Parameters
-        ----------
-        lat: Union[NDArray, float]
-            latitude values
+    Parameters
+    ----------
+    lat: Union[NDArray, float]
+        latitude values
 
-        Returns
-        -------
-        Union[NDArray, float]
-            Theta values
+    Returns
+    -------
+    Union[NDArray, float]
+        Theta values
 
-        """
+    """
 
     theta = 90 - lat
 
@@ -102,30 +99,26 @@ def lat_to_theta(lat: Union[NDArray, float]) -> Union[NDArray, float]:
 
 def theta_to_lat(theta: Union[NDArray, float]) -> Union[NDArray, float]:
     """
-        Converts theta values (see below) to latitude values
+    Converts theta values (see below) to latitude values
 
-        Parameters
-        ----------
-        theta: Union[NDArray, float]
-            angles in DEGREES from the magnetic pole
+    Parameters
+    ----------
+    theta: Union[NDArray, float]
+        angles in DEGREES from the magnetic pole
 
-        Returns
-        -------
-        Union[NDArray, float]
-            Latitude value(s)
+    Returns
+    -------
+    Union[NDArray, float]
+        Latitude value(s)
 
-        """
+    """
 
     lat = 90 - theta
 
     return lat
 
 
-def _common_formatting(
-        ax: axes,
-        fontsize: float,
-        max_theta: float
-) -> None:
+def _common_formatting(ax: axes, fontsize: float, max_theta: float) -> None:
     """
     Formatting which applies to all sub-plots that are in polar coordinates
 
@@ -143,7 +136,7 @@ def _common_formatting(
     """
 
     # Rotate plot to match conventional MLT representation
-    ax.set_theta_zero_location('S')
+    ax.set_theta_zero_location("S")
 
     # Set lim in radial direction
     max_theta_for_plot = max_theta - (max_theta % 5) + 5
@@ -153,26 +146,17 @@ def _common_formatting(
 
     # Ticks in MLT
     ax.set_xticklabels(
-        ['00\nMLT', '', '06\nMLT', '', '12\nMLT', '', '18\nMLT', ''],
-        fontsize=fontsize
+        ["00\nMLT", "", "06\nMLT", "", "12\nMLT", "", "18\nMLT", ""], fontsize=fontsize
     )
 
     # Ticks in latitude
     r_ticks = np.arange(0, max_theta_for_plot + 5, 5)
     ax.set_yticks(r_ticks)
-    ax.set_yticklabels(
-        [int(lat) for lat in theta_to_lat(r_ticks)],
-        fontsize=fontsize
-    )
+    ax.set_yticklabels([int(lat) for lat in theta_to_lat(r_ticks)], fontsize=fontsize)
 
     # Set grid lines
     ax.grid(
-        visible=True,
-        which='both',
-        axis='both',
-        linestyle=':',
-        alpha=1,
-        color='black'
+        visible=True, which="both", axis="both", linestyle=":", alpha=1, color="black"
     )
 
     return None

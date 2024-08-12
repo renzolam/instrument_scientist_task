@@ -29,9 +29,7 @@ logger = logging.getLogger(__name__)
 log_utils.set_logger(logger)
 
 
-def convert_1_txt_to_json(
-        abs_txt_path: Path
-) -> None:
+def convert_1_txt_to_json(abs_txt_path: Path) -> None:
     """
     For 1 given txt file containing vorticity data, converts it into json files separated by year
 
@@ -51,19 +49,47 @@ def convert_1_txt_to_json(
     record_time_list = []
 
     # For each dictionary which represents a measurement, its keys are:
-    vorticity_keys = ['r1_b1', 'r1_b2', 'r2_b1', 'r2_b2', 'area', 'vorticity_mHz', 'MLT']
-    geo_coord_keys = ['geo_lat_c', 'geo_long_c', 'geo_lat_1', 'geo_long_1', 'geo_lat_2', 'geo_long_2', 'geo_lat_3',
-                      'geo_long_3', 'geo_lat_4', 'geo_long_4']
-    aacgm_coord_keys = ['aacgm_lat_c', 'aacgm_long_c', 'aacgm_lat_1', 'aacgm_long_1', 'aacgm_lat_2', 'aacgm_long_2',
-                        'aacgm_lat_3', 'aacgm_long_3', 'aacgm_lat_4', 'aacgm_long_4']
+    vorticity_keys = [
+        "r1_b1",
+        "r1_b2",
+        "r2_b1",
+        "r2_b2",
+        "area",
+        "vorticity_mHz",
+        "MLT",
+    ]
+    geo_coord_keys = [
+        "geo_lat_c",
+        "geo_long_c",
+        "geo_lat_1",
+        "geo_long_1",
+        "geo_lat_2",
+        "geo_long_2",
+        "geo_lat_3",
+        "geo_long_3",
+        "geo_lat_4",
+        "geo_long_4",
+    ]
+    aacgm_coord_keys = [
+        "aacgm_lat_c",
+        "aacgm_long_c",
+        "aacgm_lat_1",
+        "aacgm_long_1",
+        "aacgm_lat_2",
+        "aacgm_long_2",
+        "aacgm_lat_3",
+        "aacgm_long_3",
+        "aacgm_lat_4",
+        "aacgm_long_4",
+    ]
 
     # Opening the data txt file
-    with open(abs_txt_path, 'r') as f:
+    with open(abs_txt_path, "r") as f:
         lines = f.readlines()
 
         for idx, line in enumerate(lines):
 
-            if line.startswith('#'):  # Ignoring comments
+            if line.startswith("#"):  # Ignoring comments
                 pass
             else:
 
@@ -75,8 +101,9 @@ def convert_1_txt_to_json(
                         hours = float(split_line[-1])
                         date_data = split_line[:-1].astype(int)
 
-                        record_time = (datetime(*date_data, tzinfo=timezone.utc)
-                                       + timedelta(seconds=hours * 60 * 60))
+                        record_time = datetime(
+                            *date_data, tzinfo=timezone.utc
+                        ) + timedelta(seconds=hours * 60 * 60)
                         record_time_list.append(record_time)
 
                         # Splitting data according to their years
@@ -86,41 +113,44 @@ def convert_1_txt_to_json(
                         # Add a list of dictionaries. Each dict contains data of 1 measurement made at that time
                         data[record_time.year][record_time.isoformat()] = []
 
-                    elif split_line.size == 7:  # If it is a line containing data of the vorticity
+                    elif (
+                        split_line.size == 7
+                    ):  # If it is a line containing data of the vorticity
 
-                        split_line[-2] *= -1e3  # Converting vorticity to mHz with correct sign convention
+                        split_line[
+                            -2
+                        ] *= (
+                            -1e3
+                        )  # Converting vorticity to mHz with correct sign convention
 
                         data[record_time.year][record_time_list[-1].isoformat()].append(
                             # Adds a dict to the latest timestamp
-                            dict(
-                                zip(vorticity_keys, split_line)
-                            )
+                            dict(zip(vorticity_keys, split_line))
                         )
 
-                    elif split_line.size == 11:  # If it is a line containing data of the coords
+                    elif (
+                        split_line.size == 11
+                    ):  # If it is a line containing data of the coords
 
                         if split_line[0] == 0:
 
                             # Add coords to the latest dict which contains a measurement
-                            data[record_time.year][record_time_list[-1].isoformat()][-1].update(
-                                dict(
-                                    zip(geo_coord_keys, split_line[1:])
-                                )
-                            )
+                            data[record_time.year][record_time_list[-1].isoformat()][
+                                -1
+                            ].update(dict(zip(geo_coord_keys, split_line[1:])))
 
                         elif split_line[0] == 1:
-                            data[record_time.year][record_time_list[-1].isoformat()][-1].update(
-                                dict(
-                                    zip(aacgm_coord_keys, split_line[1:])
-                                )
-                            )
+                            data[record_time.year][record_time_list[-1].isoformat()][
+                                -1
+                            ].update(dict(zip(aacgm_coord_keys, split_line[1:])))
 
                         else:
                             logger.error(
                                 f"""
                                     This line contains an unexpected coord index:
                                     {line}
-                                    """)
+                                    """
+                            )
 
                     elif split_line.size == 1:
                         pass
@@ -129,7 +159,8 @@ def convert_1_txt_to_json(
                             f"""
                                 This line contains an unexpected number of columns ({split_line.size} columns):
                                 {line}
-                                """)
+                                """
+                        )
 
                 # TODO: Better sepearte the fail conversion exception
                 except Exception as e:
@@ -145,15 +176,14 @@ def convert_1_txt_to_json(
     ##################################
     # Saving data to separate json files
     for year in list(data.keys()):
-        out_json_path = common_params.json_out_dir / f'{abs_txt_path.name.split("_")[0]}_{year}_vorticity.json'
+        out_json_path = (
+            common_params.json_out_dir
+            / f'{abs_txt_path.name.split("_")[0]}_{year}_vorticity.json'
+        )
 
-        with open(out_json_path, 'w') as f:
-            json.dump(
-                data[year],
-                f,
-                indent=4
-            )
-        logger.info(f'{out_json_path.name} saved to {str(out_json_path.parent)}')
+        with open(out_json_path, "w") as f:
+            json.dump(data[year], f, indent=4)
+        logger.info(f"{out_json_path.name} saved to {str(out_json_path.parent)}")
 
     return None
 
@@ -177,9 +207,11 @@ def all_data_to_json(main_params: MainRunParams) -> None:
     t_start = time()
 
     ####################################
-    for abs_txt_path in list(main_params.abs_data_txt_dir.glob('*.txt')):
+    for abs_txt_path in list(main_params.abs_data_txt_dir.glob("*.txt")):
         convert_1_txt_to_json(abs_txt_path)
 
-    logger.info(f'Converting data file into json files took {(time() - t_start) / 60:.2f} minute(s)')
+    logger.info(
+        f"Converting data file into json files took {(time() - t_start) / 60:.2f} minute(s)"
+    )
 
     return None

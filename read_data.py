@@ -13,7 +13,6 @@ List of functions:
 - json_to_array
 """
 
-
 import logging
 import json
 from time import time
@@ -34,9 +33,7 @@ log_utils.set_logger(logger)
 
 
 @ray.remote
-def gen_vort_obj_by_year(
-        file_abs_path: Path
-) -> Union[NDArray[VortMeasurement], None]:
+def gen_vort_obj_by_year(file_abs_path: Path) -> Union[NDArray[VortMeasurement], None]:
     """
     Turns data in a json file into a numpy array of VortMeasurement objects
 
@@ -54,13 +51,15 @@ def gen_vort_obj_by_year(
     log_utils.set_logger(logger)
 
     try:
-        with open(file_abs_path, 'r') as f:
+        with open(file_abs_path, "r") as f:
             data_dict = json.load(f)
 
         vort_yearly = np.array(
-            [VortMeasurement(vort_dict, iso_time_str)
-             for iso_time_str, vort_list in data_dict.items()
-             for vort_dict in vort_list]
+            [
+                VortMeasurement(vort_dict, iso_time_str)
+                for iso_time_str, vort_list in data_dict.items()
+                for vort_dict in vort_list
+            ]
         )
 
         return vort_yearly
@@ -73,18 +72,18 @@ def gen_vort_obj_by_year(
 
 def json_to_array() -> NDArray:
     """
-       Turns data in several json files into a single numpy array of VortMeasurement objects
+    Turns data in several json files into a single numpy array of VortMeasurement objects
 
-       Parameters
-       ----------
+    Parameters
+    ----------
 
-       Returns
-       -------
-       numpy array of VortMeasurement objects, or None if the reading process failed
-       """
+    Returns
+    -------
+    numpy array of VortMeasurement objects, or None if the reading process failed
+    """
 
     json_files = sorted(
-        list(common_params.json_out_dir.glob('*vorticity.json'))
+        list(common_params.json_out_dir.glob("*vorticity.json"))
     )  # list of all json files
 
     t_read_start = time()
@@ -94,6 +93,6 @@ def json_to_array() -> NDArray:
     )
     ray.shutdown()
 
-    logger.info(f'Reading in all json files took {time() - t_read_start} seconds')
+    logger.info(f"Reading in all json files took {time() - t_read_start} seconds")
 
     return np.concatenate(all_vort)

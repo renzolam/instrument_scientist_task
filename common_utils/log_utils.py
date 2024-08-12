@@ -15,10 +15,7 @@ from copy import copy
 from runparams import common_params
 
 
-def set_logger(
-        logger_2_set: logging.Logger
-) -> None:
-
+def set_logger(logger_2_set: logging.Logger) -> None:
     """
     Sets up logger objects so that logs will go to both the console and a file
 
@@ -36,10 +33,12 @@ def set_logger(
 
     ori_logger.setLevel(logging.INFO)
 
-    formatter = logging.Formatter("\n%(asctime)s - \n%(name)s line %(lineno)s - %(levelname)s: \n%(message)s")
+    formatter = logging.Formatter(
+        "\n%(asctime)s - \n%(name)s line %(lineno)s - %(levelname)s: \n%(message)s"
+    )
 
     # Create a file handler to write logs to a file
-    file_handler = logging.FileHandler(common_params.log_abs_path, mode='a+')
+    file_handler = logging.FileHandler(common_params.log_abs_path, mode="a+")
     file_handler.setLevel(logging.INFO)
     file_handler.setFormatter(formatter)
 

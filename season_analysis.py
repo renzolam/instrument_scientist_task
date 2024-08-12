@@ -29,7 +29,7 @@ log_utils.set_logger(logger)
 
 
 def separate_by_seasons(
-        vort_array: NDArray[VortMeasurement]
+    vort_array: NDArray[VortMeasurement],
 ) -> Dict[str, NDArray[VortMeasurement]]:
     """
     Separates array of vorticity data by season
@@ -45,13 +45,11 @@ def separate_by_seasons(
 
     # Initialisation
     ts = load.timescale()
-    eph = load('de421.bsp')
+    eph = load("de421.bsp")
 
-    all_timestamps = np.array([
-        datetime.timestamp(
-            vort_data.utc_time)
-        for vort_data in vort_array
-    ])
+    all_timestamps = np.array(
+        [datetime.timestamp(vort_data.utc_time) for vort_data in vort_array]
+    )
     all_years = np.unique([vort_data.utc_time.year for vort_data in vort_array])
 
     winter_data, spring_data, summer_data, autumn_data = [[] for _ in range(4)]
@@ -66,23 +64,21 @@ def separate_by_seasons(
             datetime.timestamp(
                 datetime.fromisoformat(ti.utc_iso()[:-1]).replace(tzinfo=timezone.utc)
             )
-            for ti in t]
+            for ti in t
+        ]
         season_edges.insert(
-            0,
-            datetime.timestamp(
-                datetime(year, 1, 1, 0, 0, tzinfo=timezone.utc)
-            )
+            0, datetime.timestamp(datetime(year, 1, 1, 0, 0, tzinfo=timezone.utc))
         )
         season_edges.append(
-            datetime.timestamp(
-                datetime(year + 1, 1, 1, 0, 0, tzinfo=timezone.utc)
-            )
+            datetime.timestamp(datetime(year + 1, 1, 1, 0, 0, tzinfo=timezone.utc))
         )
 
         which_season = np.digitize(all_timestamps, season_edges, right=False)
 
-        for i, season_data in enumerate((winter_data, spring_data, summer_data, autumn_data)):
-            season_data.append(vort_array[which_season == i+1])
+        for i, season_data in enumerate(
+            (winter_data, spring_data, summer_data, autumn_data)
+        ):
+            season_data.append(vort_array[which_season == i + 1])
         winter_data.append(vort_array[which_season == 5])
 
     vort_by_season = dict(

@@ -21,4 +21,4 @@ if not log_dir.exists():
 log_abs_path = log_dir / f"SWIS_task_{datetime.now(timezone.utc):%Y%m%d_%H%M}_UT.log"
 
 # Sets up dir where data in json forms are found
-json_out_dir = MainRunParams().output_dir / 'vorticity_json'
+json_out_dir = MainRunParams().output_dir / "vorticity_json"

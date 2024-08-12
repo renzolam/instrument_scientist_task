@@ -38,7 +38,10 @@ if __name__ == "__main__":
 
         # Convert original txt data file into json files, if explicitly told to do so,
         # or there aren't any json files in the directory
-        if main_params.txt_files_to_json or len(list(common_params.json_out_dir.glob('*vorticity.json'))) == 0:
+        if (
+            main_params.txt_files_to_json
+            or len(list(common_params.json_out_dir.glob("*vorticity.json"))) == 0
+        ):
             file_conversion.all_data_to_json(main_params)
         else:
             pass
@@ -46,26 +49,20 @@ if __name__ == "__main__":
         # Store all data in 1 numpy array
         all_vort = read_data.json_to_array()
 
-        logger.info(f'Memory occupied by all vorticity data is {getsizeof(all_vort) / 1e6:.2f} MB')
+        logger.info(
+            f"Memory occupied by all vorticity data is {getsizeof(all_vort) / 1e6:.2f} MB"
+        )
 
         vort_by_season = season_analysis.separate_by_seasons(all_vort)
 
         ###################################
         # Produce plot for map of mean and median values
-        plot_all.plot_mean_median_counts(
-            main_params,
-            map_params,
-            all_vort
-        )
+        plot_all.plot_mean_median_counts(main_params, map_params, all_vort)
 
-        plot_by_season.plot_mean_median_counts(
-            main_params,
-            map_params,
-            vort_by_season
-        )
+        plot_by_season.plot_mean_median_counts(main_params, map_params, vort_by_season)
 
     except Exception as e:
         logger.exception(e)
 
     # End
-    logger.info(f'The run took {(time() - t_start) / 60:.2f} minutes in total')
+    logger.info(f"The run took {(time() - t_start) / 60:.2f} minutes in total")

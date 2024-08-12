@@ -32,18 +32,19 @@ from scipy.stats import binned_statistic_2d
 from common_utils import log_utils, plot_utils
 from classes.map_params_cls import MapParams
 from classes.main_runparams_cls import MainRunParams
+from classes.data_class import VortMeasurement
 
 logger = logging.getLogger(__name__)
 log_utils.set_logger(logger)
 
 
 def _ax_formatting(
-        fig: figure,
-        ax: axes,
-        plot_to_format: QuadMesh,
-        plot_type: str,
-        coord: str,
-        fontsize: float
+    fig: figure,
+    ax: axes,
+    plot_to_format: QuadMesh,
+    plot_type: str,
+    coord: str,
+    fontsize: float,
 ) -> None:
     """
     Formatting which applies to sub-plots specifically
@@ -70,18 +71,18 @@ def _ax_formatting(
 
     # Initialisation
 
-    assert plot_type in ('mean', 'median', 'count')
+    assert plot_type in ("mean", "median", "count")
 
     label_dict = {
-        'mean': 'Mean Vorticity (mHz)',
-        'median': 'Median Vorticity (mHz)',
-        'count': 'Number of Data Points'
+        "mean": "Mean Vorticity (mHz)",
+        "median": "Median Vorticity (mHz)",
+        "count": "Number of Data Points",
     }
 
     ticks_dict = {
-        'mean': np.arange(-3.5, 3.5, 1),
-        'median': np.arange(-3.5, 3.5, 1),
-        'count': np.power(10, range(0, 10))
+        "mean": np.arange(-3.5, 3.5, 1),
+        "median": np.arange(-3.5, 3.5, 1),
+        "count": np.power(10, range(0, 10)),
     }
 
     ####################
@@ -91,16 +92,12 @@ def _ax_formatting(
     cbar = fig.colorbar(
         plot_to_format,
         ax=ax,
-        orientation='horizontal',
-        location='top',
+        orientation="horizontal",
+        location="top",
         aspect=15,
-        ticks=ticks_dict[plot_type]
+        ticks=ticks_dict[plot_type],
     )
-    cbar.ax.tick_params(
-        labelsize=fontsize,
-        length=fontsize / 2,
-        width=fontsize / 6
-    )
+    cbar.ax.tick_params(labelsize=fontsize, length=fontsize / 2, width=fontsize / 6)
     cbar.ax.set_title(label_dict[plot_type], fontsize=fontsize, pad=fontsize)
 
     # Label for radial axis
@@ -108,16 +105,18 @@ def _ax_formatting(
     ax.text(
         np.radians(label_position + 10),
         ax.get_rmax() * 1.1,
-        f'{coord.upper()} Latitude',
-        ha='left',
-        va='top',
-        fontsize=fontsize
+        f"{coord.upper()} Latitude",
+        ha="left",
+        va="top",
+        fontsize=fontsize,
     )
 
     return None
 
 
-def _fig_formatting(fig: figure, fontsize: float) -> None:
+def _fig_formatting(
+    fig: figure, all_vort: NDArray[VortMeasurement], fontsize: float
+) -> None:
     """
     Does formatting that is not specific to any subplot
 
@@ -125,6 +124,8 @@ def _fig_formatting(fig: figure, fontsize: float) -> None:
     ----------
     fig: figure
         figure object to be formatted
+    all_vort: NDArray[VortMeasurement]
+        Array of all vorticity data points
     fontsize: float
         Size of fonts (in general)
 
@@ -133,33 +134,37 @@ def _fig_formatting(fig: figure, fontsize: float) -> None:
 
     """
 
+    all_t = np.array([vort.utc_time for vort in all_vort])
+    min_year = np.nanmin(all_t).year
+    max_year = np.nanmax(all_t).year
+
     fig.suptitle(
-        """
+        f"""
         Mean, Median, and Number of Data Points 
         for Vorticity Measurements
         of the Northern Hemisphere
-        Made between 2000 and 2005
+        In the Period {min_year} - {max_year}
         """,
         fontsize=fontsize,
-        horizontalalignment='center',
-        verticalalignment='center',
-        position=(0.45, 0.9)
+        horizontalalignment="center",
+        verticalalignment="center",
+        position=(0.45, 0.9),
     )
 
     return None
 
 
 def _plot_subplot(
-        phi_edges: NDArray,
-        theta_edges: NDArray,
-        fig: figure,
-        ax_to_plot: axes,
-        stat_data: Dict[str, NDArray],
-        stat_type: str,
-        max_theta: float,
-        coord: str,
-        fontsize: float,
-        vort_cbar_step: float = 0.5
+    phi_edges: NDArray,
+    theta_edges: NDArray,
+    fig: figure,
+    ax_to_plot: axes,
+    stat_data: Dict[str, NDArray],
+    stat_type: str,
+    max_theta: float,
+    coord: str,
+    fontsize: float,
+    vort_cbar_step: float = 0.5,
 ) -> None:
     """
     Plots a subplot
@@ -194,19 +199,17 @@ def _plot_subplot(
     """
 
     # Initialisation
-    assert stat_type in ('mean', 'median', 'count')
+    assert stat_type in ("mean", "median", "count")
 
     ax = copy(ax_to_plot)
 
-    colour_map_dict = {
-        'mean': 'RdBu',
-        'median': 'RdBu',
-        'count': 'jet'
-    }
+    colour_map_dict = {"mean": "RdBu", "median": "RdBu", "count": "jet"}
 
     # Normalise data for the colorbar if needed
-    if stat_type in ('mean', 'median'):
-        all_mean_and_median = np.concatenate([stat_data[stat].flatten() for stat in ('mean', 'median')])
+    if stat_type in ("mean", "median"):
+        all_mean_and_median = np.concatenate(
+            [stat_data[stat].flatten() for stat in ("mean", "median")]
+        )
         data_min = np.nanmin(all_mean_and_median)
         data_max = np.nanmax(all_mean_and_median)
 
@@ -217,55 +220,34 @@ def _plot_subplot(
         abs_biggest = np.max([np.abs(plot_cbar_min), np.abs(plot_cbar_max)])
 
         norm = colors.Normalize(vmin=-abs_biggest, vmax=abs_biggest)
-    elif stat_type == 'count':
-        plot_cbar_min = np.power(
-            10,
-            np.floor(
-                np.log10(
-                    np.nanmin(stat_data['count'])
-                )
-            )
-        )
-        plot_cbar_max = np.power(
-            10,
-            np.ceil(
-                np.log10(
-                    np.nanmax(stat_data['count'])
-                )
-            )
-        )
+    elif stat_type == "count":
+        plot_cbar_min = np.power(10, np.floor(np.log10(np.nanmin(stat_data["count"]))))
+        plot_cbar_max = np.power(10, np.ceil(np.log10(np.nanmax(stat_data["count"]))))
 
         norm = colors.LogNorm(vmin=plot_cbar_min, vmax=plot_cbar_max)
     else:
-        raise ValueError(f'Plot_type {stat_type} not recognized')
+        raise ValueError(f"Plot_type {stat_type} not recognized")
     #########################
     # Actual plotting
     plot = ax.pcolormesh(
         *np.meshgrid(phi_edges, theta_edges),
         stat_data[stat_type].T,
         cmap=colour_map_dict[stat_type],
-        norm=norm
+        norm=norm,
     )
     plot_utils._common_formatting(ax, fontsize, max_theta)
-    _ax_formatting(
-        fig,
-        ax,
-        plot,
-        stat_type,
-        coord,
-        fontsize
-    )
+    _ax_formatting(fig, ax, plot, stat_type, coord, fontsize)
 
     return None
 
 
 def plot_mean_median_counts(
-        main_params: MainRunParams,
-        map_params: MapParams,
-        vort_array: NDArray,
-        coord: str = 'aacgm',
-        count_cutoff: int = 100,
-        fontsize=40
+    main_params: MainRunParams,
+    map_params: MapParams,
+    vort_array: NDArray,
+    coord: str = "aacgm",
+    count_cutoff: int = 100,
+    fontsize=40,
 ):
     """
     Plot the mean, median and number of data points for all data
@@ -299,7 +281,7 @@ def plot_mean_median_counts(
 
     """
 
-    if coord not in ('aacgm', 'geo'):
+    if coord not in ("aacgm", "geo"):
         raise ValueError('Coord must be either "aacgm" or "geo"')
     else:
         pass
@@ -309,7 +291,7 @@ def plot_mean_median_counts(
         np.array([vort_data.MLT for vort_data in vort_array])
     )
     theta_coords = plot_utils.lat_to_theta(
-        np.array([getattr(vort_data, f'{coord}_lat_c') for vort_data in vort_array])
+        np.array([getattr(vort_data, f"{coord}_lat_c") for vort_data in vort_array])
     )
     vort_data = np.array(
         [vort_measurement.vorticity_mHz for vort_measurement in vort_array]
@@ -327,11 +309,13 @@ def plot_mean_median_counts(
 
     # All edges of the bins for THETA
     min_lat = np.min(
-        np.array([getattr(vort_data, f'{coord}_lat_c') for vort_data in vort_array])
+        np.array([getattr(vort_data, f"{coord}_lat_c") for vort_data in vort_array])
     )
-    min_lat_edge = (min_lat
-                    - (min_lat % map_params.lat_bin_size_degree)
-                    + map_params.lat_bin_size_degree)
+    min_lat_edge = (
+        min_lat
+        - (min_lat % map_params.lat_bin_size_degree)
+        + map_params.lat_bin_size_degree
+    )
     max_theta = 90 - min_lat_edge
 
     theta_edges = plot_utils.create_bin_edges((0, max_theta), d_theta_deg)
@@ -346,28 +330,29 @@ def plot_mean_median_counts(
                 theta_coords,
                 vort_data,
                 statistic=stat,
-                bins=(phi_edges, theta_edges)
-            ).statistic
+                bins=(phi_edges, theta_edges),
+            ).statistic,
         )
-        for stat in ('mean', 'median', 'count')
+        for stat in ("mean", "median", "count")
     )
 
-    assert not np.isnan(stat_data['count']).any()  # Assert there aren't any invalid values in the counts
+    assert not np.isnan(
+        stat_data["count"]
+    ).any()  # Assert there aren't any invalid values in the counts
 
     # Do not plot bins with fewer counts than a threshold (100 by default)
-    stat_data['mean'][stat_data['count'] < count_cutoff] = np.nan
-    stat_data['median'][stat_data['count'] < count_cutoff] = np.nan
+    stat_data["mean"][stat_data["count"] < count_cutoff] = np.nan
+    stat_data["median"][stat_data["count"] < count_cutoff] = np.nan
 
     # Do not plot bins that have 0 counts
-    stat_data['count'][stat_data['count'] == 0] = np.nan
+    stat_data["count"][stat_data["count"] == 0] = np.nan
 
     ####################
     # Setting up the plotting routine
-    fig, axs = plt.subplots(1, 3, figsize=(36, 21),
-                            subplot_kw={'projection': 'polar'})
+    fig, axs = plt.subplots(1, 3, figsize=(36, 21), subplot_kw={"projection": "polar"})
 
     # Plots the data
-    for column_idx, stat_type in enumerate(('mean', 'median', 'count')):
+    for column_idx, stat_type in enumerate(("mean", "median", "count")):
         _plot_subplot(
             phi_edges,
             theta_edges,
@@ -381,17 +366,14 @@ def plot_mean_median_counts(
         )
 
     # Does more formatting
-    _fig_formatting(fig, fontsize)
+    _fig_formatting(fig, vort_array, fontsize)
     fig.tight_layout()
 
     # Saving the file
-    plot_dir = main_params.output_dir / 'plots'
+    plot_dir = main_params.output_dir / "plots"
     if not plot_dir.exists():
         plot_dir.mkdir(parents=True)
 
-    plt.savefig(
-        plot_dir / 'avg_median_counts_(all_data).png',
-        bbox_inches="tight"
-    )
+    plt.savefig(plot_dir / "avg_median_counts_(all_data).png", bbox_inches="tight")
 
     return None

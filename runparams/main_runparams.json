@@ -1,5 +1,5 @@
 {
   "abs_data_txt_dir": "/Users/loan/data_volume/Instrument Scientist/original_txt_files",
   "output_dir": "/Users/loan/data_volume/Instrument Scientist",
-  "txt_files_to_json": true
+  "txt_files_to_json": false
 }

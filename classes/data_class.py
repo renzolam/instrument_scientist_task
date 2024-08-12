@@ -60,20 +60,19 @@ class VortMeasurement:
         for key, value in datapoint.items():
 
             # Filters out invalid values
-            if key == 'vorticity_mHz' and (not (-1e3 < value < 1e3)):
+            if key == "vorticity_mHz" and (not (-1e3 < value < 1e3)):
                 value = np.nan
-            elif key == 'MLT' and (not (0 <= value <= 24)):
+            elif key == "MLT" and (not (0 <= value <= 24)):
                 value = np.nan
-            elif '_long_' in key and (not (-180 <= value <= 180)):
+            elif "_long_" in key and (not (-180 <= value <= 180)):
                 value = np.nan
-            elif '_lat_' in key and (not (-90 <= value <= 90)):
+            elif "_lat_" in key and (not (-90 <= value <= 90)):
                 value = np.nan
             else:
                 pass
 
             setattr(self, key, value)
 
-        self.utc_time = datetime.fromisoformat(iso_time_str).replace(tzinfo=timezone.utc)
-
-
-
+        self.utc_time = datetime.fromisoformat(iso_time_str).replace(
+            tzinfo=timezone.utc
+        )
