@@ -399,6 +399,7 @@ def plot_mean_median_counts(
                 seasonal_min_max_dict[stat_type]['min'].append(np.nanmin(seasonal_data[stat_type]))
                 seasonal_min_max_dict[stat_type]['max'].append(np.nanmax(seasonal_data[stat_type]))
 
+        # The min and max values for mean, median or max across all seasons
         overall_min_max = dict(
             (
                 stat_type,
@@ -410,6 +411,7 @@ def plot_mean_median_counts(
             for stat_type in ('mean', 'median', 'count')
         )
 
+        # Determine the limits for the colorbar based on the min and max values present across all seasons
         cbar_min_max_output = {
             'count':
                 {
@@ -444,6 +446,16 @@ def plot_mean_median_counts(
                                 overall_min_max['median']['max'] % vort_cbar_step) + vort_cbar_step
                 }
         }
+
+        # Make the colorbar symmetric about 0 for means and medians. Assumes max val > 0
+        for stat_type in ('mean', 'median'):
+            min_for_stat = cbar_min_max_output[stat_type]['min']
+            max_for_stat = cbar_min_max_output[stat_type]['max']
+
+            biggest_abs_val = np.max([np.abs(min_for_stat), np.abs(max_for_stat)])
+
+            cbar_min_max_output[stat_type]['min'] = - biggest_abs_val
+            cbar_min_max_output[stat_type]['max'] = biggest_abs_val
 
         return cbar_min_max_output
 
