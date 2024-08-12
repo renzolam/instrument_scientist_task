@@ -4,7 +4,7 @@ Author        : Pak Yin (Renzo) Lam
                 paklam@bas.ac.uk
 
 Date Created  : 2024-08-10
-Last Modified : 2024-08-10
+Last Modified : 2024-08-12
 
 Summary       : Plots the plots required
 
@@ -21,7 +21,7 @@ from typing import Tuple, Union, List, Dict
 from copy import deepcopy, copy
 
 import matplotlib.pyplot as plt
-from mpl_toolkits.axes_grid1.inset_locator import inset_axes
+from matplotlib import colormaps
 from matplotlib import colors
 from matplotlib import axes
 from matplotlib.collections import QuadMesh
@@ -109,10 +109,10 @@ def theta_to_lat(theta: Union[NDArray, float]) -> Union[NDArray, float]:
 def plot_mean_median_counts(
         main_params: MainRunParams,
         map_params: MapParams,
-        spring_data: NDArray,
-        summer_data: NDArray,
-        autumn_data: NDArray,
-        winter_data: NDArray,
+        spring_data: NDArray[VortMeasurement],
+        summer_data: NDArray[VortMeasurement],
+        autumn_data: NDArray[VortMeasurement],
+        winter_data: NDArray[VortMeasurement],
         coord: str = 'aacgm',
         count_cutoff: int = 100,
         fontsize=40
@@ -322,8 +322,8 @@ def plot_mean_median_counts(
             ax = copy(ax_to_plot)
 
             colour_map_dict = {
-                'mean': 'jet',
-                'median': 'jet',
+                'mean': 'RdBu',
+                'median': 'RdBu',
                 'count': 'jet'
             }
 
@@ -339,7 +339,7 @@ def plot_mean_median_counts(
             plot = ax.pcolormesh(
                 *np.meshgrid(phi_edges, theta_edges),
                 data.T,
-                cmap=colour_map_dict[plot_type],
+                cmap=colormaps[colour_map_dict[plot_type]],
                 norm=norm
             )
             _common_formatting(ax)

@@ -60,11 +60,12 @@ if __name__ == "__main__":
 
         ###################################
         # Produce plot for map of mean and median values
-        # plot_all.plot_mean_median_counts(
-        #     main_params,
-        #     map_params,
-        #     all_vort
-        # )
+        plot_all.plot_mean_median_counts(
+            main_params,
+            map_params,
+            all_vort
+        )
+
         plot_by_season.plot_mean_median_counts(
             main_params,
             map_params,

@@ -212,8 +212,8 @@ def plot_mean_median_counts(
         }
 
         ticks_dict = {
-            'mean': np.arange(-3.0, 3.5, 0.5),
-            'median': np.arange(-3.0, 3.5, 0.5),
+            'mean': np.arange(-3.5, 3.5, 1),
+            'median': np.arange(-3.5, 3.5, 1),
             'count': np.power(10, range(0, 10))
         }
 
@@ -281,8 +281,8 @@ def plot_mean_median_counts(
         ax = copy(ax_to_plot)
 
         colour_map_dict = {
-            'mean': 'jet',
-            'median': 'jet',
+            'mean': 'RdBu',
+            'median': 'RdBu',
             'count': 'jet'
         }
 
@@ -295,7 +295,10 @@ def plot_mean_median_counts(
             plot_cbar_min = data_min - (data_min % vort_cbar_step)
             plot_cbar_max = data_max - (data_max % vort_cbar_step) + vort_cbar_step
 
-            norm = colors.Normalize(vmin=plot_cbar_min, vmax=plot_cbar_max)
+            # Make colorbar symmetrical about 0
+            abs_biggest = np.max([np.abs(plot_cbar_min), np.abs(plot_cbar_max)])
+
+            norm = colors.Normalize(vmin=-abs_biggest, vmax=abs_biggest)
         elif plot_type == 'count':
             plot_cbar_min = np.power(
                 10,
