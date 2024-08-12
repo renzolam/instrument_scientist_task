@@ -246,10 +246,15 @@ def plot_mean_median_counts(
                 aspect=15,
                 ticks=ticks_dict[plot_type],
             )
-            cbar.ax.tick_params(labelsize=fontsize)
+            cbar.ax.tick_params(
+                labelsize=fontsize,
+                length=fontsize / 2,
+                width=fontsize / 6
+            )
             cbar.ax.set_title(
                 label_dict[plot_type],
-                fontsize=fontsize * 1.5,
+                fontsize=fontsize,
+                fontweight='bold',
                 pad=fontsize
             )
 
