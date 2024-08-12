@@ -4,15 +4,14 @@ Author        : Pak Yin (Renzo) Lam
                 paklam@bas.ac.uk
 
 Date Created  : 2024-08-10
-Last Modified : 2024-08-10
+Last Modified : 2024-08-12
 
-Summary       : Plots the plots required
+Summary       : Plots the mean, median and number of data points for all data
 
 List of functions:
-- create_bin_edges
-- mlt_to_phi
-- lat_to_theta
-- theta_to_lat
+- _ax_formatting
+- _fig_formatting
+- _plot_subplot
 - plot_mean_median_counts
 """
 
@@ -47,7 +46,22 @@ def _ax_formatting(
         fontsize: float
 ) -> None:
     """
-    Formatting which applies to sub-plots which shows vorticities
+    Formatting which applies to sub-plots specifically
+
+    Parameters
+    ----------
+    fig: figure
+        figure object to be formatted
+    ax: axes
+        axes object to be formatted
+    plot_to_format: QuadMesh
+        'Image' object to be associated with the colorbar
+    plot_type: str
+        Is it mean, median or counts?
+    coord: str
+        Coordinate system used for latitudes
+    fontsize: float
+        Size of fonts (in general)
 
     Returns
     -------
@@ -82,7 +96,11 @@ def _ax_formatting(
         aspect=15,
         ticks=ticks_dict[plot_type]
     )
-    cbar.ax.tick_params(labelsize=fontsize)
+    cbar.ax.tick_params(
+        labelsize=fontsize,
+        length=fontsize / 2,
+        width=fontsize / 6
+    )
     cbar.ax.set_title(label_dict[plot_type], fontsize=fontsize, pad=fontsize)
 
     # Label for radial axis
@@ -102,6 +120,13 @@ def _ax_formatting(
 def _fig_formatting(fig: figure, fontsize: float) -> None:
     """
     Does formatting that is not specific to any subplot
+
+    Parameters
+    ----------
+    fig: figure
+        figure object to be formatted
+    fontsize: float
+        Size of fonts (in general)
 
     Returns
     -------
@@ -131,11 +156,42 @@ def _plot_subplot(
         ax_to_plot: axes,
         stat_data: Dict[str, NDArray],
         stat_type: str,
-        max_theta,
+        max_theta: float,
         coord: str,
-        fontsize,
+        fontsize: float,
         vort_cbar_step: float = 0.5
 ) -> None:
+    """
+    Plots a subplot
+
+    Parameters
+    ----------
+    phi_edges: NDArray
+        Boundary values for the bins in phi
+    theta_edges: NDArray
+        Boundary values for the bins in theta
+    fig: figure
+        figure object to be formatted
+    ax_to_plot: axes
+        axes object to be formatted
+    stat_data: Dict[str, NDArray]
+        Dictionary of statistics data (mean, median, counts)
+    stat_type: str
+        Which statistic should be plotted
+    max_theta: float
+        Max value of theta
+    coord: str
+        Coordinate system used for latitudes
+    fontsize: float
+        Size of fonts (in general)
+    vort_cbar_step: float = 0.5
+        Round up/ down the max/ min value of vorticity to the nearest vort_cbar_step value
+        e.g. vort_cbar_step = 0.5, then 4.3 will be rounded up to 4.5, and -0.3 to -0.5
+
+    Returns
+    -------
+
+    """
 
     # Initialisation
     assert stat_type in ('mean', 'median', 'count')
@@ -212,7 +268,7 @@ def plot_mean_median_counts(
         fontsize=40
 ):
     """
-
+    Plot the mean, median and number of data points for all data
 
     In order to make the data plottable on a polar projection,
     - MLT is converted to phi (radians), which is the 'azimuthal angle', aka the angle
