@@ -193,7 +193,8 @@ def plot_mean_median_counts(
     def _ax_formatting(
             ax_to_set: axes,
             plot_to_format: QuadMesh,
-            plot_type: str
+            plot_type: str,
+            row_idx: int,
     ) -> None:
         """
         Formatting which applies to sub-plots which shows vorticities
@@ -223,28 +224,31 @@ def plot_mean_median_counts(
         ####################
         # Does the formatting
 
-        # For the colorbar
-        cbar = fig.colorbar(
-            plot_to_format,
-            ax=ax,
-            orientation='horizontal',
-            location='top',
-            aspect=15,
-            ticks=ticks_dict[plot_type]
-        )
-        cbar.ax.tick_params(labelsize=fontsize)
-        cbar.ax.set_title(label_dict[plot_type], fontsize=fontsize, pad=fontsize)
+        if row_idx == 0:
+            # Plots colorbar only for the 1st row
+            cbar = fig.colorbar(
+                plot_to_format,
+                ax=ax,
+                orientation='horizontal',
+                location='top',
+                aspect=15,
+                ticks=ticks_dict[plot_type]
+            )
+            cbar.ax.tick_params(labelsize=fontsize)
+            cbar.ax.set_title(label_dict[plot_type], fontsize=fontsize, pad=fontsize)
 
-        # Label for radial axis
-        label_position = ax.get_rlabel_position()
-        ax.text(
-            np.radians(label_position + 10),
-            ax.get_rmax() * 1.1,
-            f'{coord.upper()} Latitude',
-            ha='left',
-            va='top',
-            fontsize=fontsize
-        )
+            # Only label the radial axis for the 1st row to avoid unnecessary duplications
+            label_position = ax.get_rlabel_position()
+            ax.text(
+                np.radians(label_position + 10),
+                ax.get_rmax() * 1.1,
+                f'{coord.upper()} Latitude',
+                ha='left',
+                va='top',
+                fontsize=fontsize
+            )
+        else:
+            pass
 
         return None
 
@@ -309,7 +313,7 @@ def plot_mean_median_counts(
                 norm=norm
             )
             _common_formatting(ax)
-            _ax_formatting(ax, plot, plot_type)
+            _ax_formatting(ax, plot, plot_type, row_idx)
 
             return None
 
@@ -491,8 +495,8 @@ def plot_mean_median_counts(
     fig, axs = plt.subplots(4, 3, figsize=(36, 70),
                             subplot_kw={'projection': 'polar'})
 
-    for season_idx, season_data in enumerate((spring_data, summer_data, autumn_data, winter_data)):
-        _plot_1_season(axs[season_idx])
+    for row_idx, season_data in enumerate((spring_data, summer_data, autumn_data, winter_data)):
+        _plot_1_season(axs[row_idx])
 
     # Does more formatting
     _fig_formatting()
