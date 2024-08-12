@@ -7,6 +7,13 @@ Date Created  : 2024-08-12
 Last Modified : 2024-08-12
 
 Summary       : Provide functions that are necessary during plotting
+
+List of functions:
+- create_bin_edges
+- mlt_to_phi
+- lat_to_theta
+- theta_to_lat
+- _common_formatting
 """
 
 import logging
@@ -27,6 +34,23 @@ def create_bin_edges(
         lims: Tuple[float, float],
         bin_size: float
 ) -> NDArray:
+    """
+    Create an array of the values of the edges of the bins
+
+    Parameters
+    ----------
+    lims: Tuple[float, float]
+        Upper and lower bounds for a given dimension (e.g. for Phi in spherical coordinates, it is 0 to 2 pi)
+    bin_size: float
+        Size of the bins
+
+    Returns
+    -------
+    NDArray
+        Array of the values of the edges of the bins
+
+    """
+
     edges = np.arange(lims[0], lims[1] + bin_size, bin_size)
 
     return edges
@@ -44,6 +68,8 @@ def mlt_to_phi(mlt: Union[NDArray, float]) -> Union[NDArray, float]:
 
     Returns
     -------
+    Union[NDArray, float]
+        Phi value(s)
 
     """
 
@@ -64,6 +90,8 @@ def lat_to_theta(lat: Union[NDArray, float]) -> Union[NDArray, float]:
 
         Returns
         -------
+        Union[NDArray, float]
+            Theta values
 
         """
 
@@ -83,6 +111,8 @@ def theta_to_lat(theta: Union[NDArray, float]) -> Union[NDArray, float]:
 
         Returns
         -------
+        Union[NDArray, float]
+            Latitude value(s)
 
         """
 
@@ -97,7 +127,19 @@ def _common_formatting(
         max_theta: float
 ) -> None:
     """
-    Formatting which applies to all sub-plots
+    Formatting which applies to all sub-plots that are in polar coordinates
+
+    Parameters
+    ----------
+    ax: axes
+        axes object to be formatted
+    fontsize: float
+        Size of fonts (in general)
+    max_theta: float
+        Max value of theta
+
+    Returns
+    -------
     """
 
     # Rotate plot to match conventional MLT representation
