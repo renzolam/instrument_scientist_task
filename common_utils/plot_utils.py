@@ -12,6 +12,8 @@ Summary       : Provide functions that are necessary during plotting
 import logging
 from typing import Tuple, Union
 
+from matplotlib import pyplot as plt
+from matplotlib import axes
 import numpy as np
 from numpy.typing import NDArray
 
@@ -87,3 +89,48 @@ def theta_to_lat(theta: Union[NDArray, float]) -> Union[NDArray, float]:
     lat = 90 - theta
 
     return lat
+
+
+def _common_formatting(
+        ax: axes,
+        fontsize: float,
+        max_theta: float
+) -> None:
+    """
+    Formatting which applies to all sub-plots
+    """
+
+    # Rotate plot to match conventional MLT representation
+    ax.set_theta_zero_location('S')
+
+    # Set lim in radial direction
+    max_theta_for_plot = max_theta - (max_theta % 5) + 5
+    ax.set_rlim(0, max_theta_for_plot)
+
+    # Ticks
+
+    # Ticks in MLT
+    ax.set_xticklabels(
+        ['00\nMLT', '', '06\nMLT', '', '12\nMLT', '', '18\nMLT', ''],
+        fontsize=fontsize
+    )
+
+    # Ticks in latitude
+    r_ticks = np.arange(0, max_theta_for_plot + 5, 5)
+    ax.set_yticks(r_ticks)
+    ax.set_yticklabels(
+        [int(lat) for lat in theta_to_lat(r_ticks)],
+        fontsize=fontsize
+    )
+
+    # Set grid lines
+    ax.grid(
+        visible=True,
+        which='both',
+        axis='both',
+        linestyle=':',
+        alpha=1,
+        color='black'
+    )
+
+    return None

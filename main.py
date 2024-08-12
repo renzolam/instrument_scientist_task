@@ -47,16 +47,9 @@ if __name__ == "__main__":
         # Store all data in 1 numpy array
         all_vort = read_data.json_to_array()
 
-        # Ensure all data has been read in
-        # if np.isnan(vort_array).any():
-        #     logger.exception('There was a problem reading in the json files. See log file for details.')
-        #     exit()
-        # else:
-        #     pass
+        logger.info(f'Memory occupied by all vorticity data is {getsizeof(all_vort) / 1e6:.2f} MB')
 
-        logger.info(f'Memory occupied by all vorticity data is {getsizeof(all_vort) / 1e6} MB')
-
-        spring_data, summer_data, autumn_data, winter_data = season_analysis.separate_by_seasons(all_vort)
+        vort_by_season = season_analysis.separate_by_seasons(all_vort)
 
         ###################################
         # Produce plot for map of mean and median values
@@ -69,10 +62,7 @@ if __name__ == "__main__":
         plot_by_season.plot_mean_median_counts(
             main_params,
             map_params,
-            spring_data,
-            summer_data,
-            autumn_data,
-            winter_data
+            vort_by_season
         )
 
     except Exception as e:

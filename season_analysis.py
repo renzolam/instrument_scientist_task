@@ -3,21 +3,23 @@ Author        : Pak Yin (Renzo) Lam
                 British Antarctic Survey
                 paklam@bas.ac.uk
 
-Date Created  : 
-Last Modified : 
+Date Created  : 2024-08-12
+Last Modified : 2024-08-12
 
-Summary       : 
+Summary       : Separates array of vorticity data by season
+
+List of functions:
+- separate_by_seasons
 """
 
 import logging
-from copy import copy
-from typing import List, Tuple
+from typing import Dict
 from datetime import datetime, timezone
 
 import numpy as np
 from numpy.typing import NDArray
 from skyfield import almanac
-from skyfield.api import N, S, E, W, load, wgs84
+from skyfield.api import load
 
 from common_utils import log_utils
 from classes.data_class import VortMeasurement
@@ -28,7 +30,18 @@ log_utils.set_logger(logger)
 
 def separate_by_seasons(
         vort_array: NDArray[VortMeasurement]
-) -> Tuple[NDArray[VortMeasurement], NDArray[VortMeasurement], NDArray[VortMeasurement], NDArray[VortMeasurement]]:
+) -> Dict[str, NDArray[VortMeasurement]]:
+    """
+    Separates array of vorticity data by season
+
+    Parameters
+    ----------
+    vort_array: NDArray[VortMeasurement]
+
+    Returns
+    -------
+    Array of vorticity data separated by season
+    """
 
     # Initialisation
     ts = load.timescale()
@@ -72,9 +85,11 @@ def separate_by_seasons(
             season_data.append(vort_array[which_season == i+1])
         winter_data.append(vort_array[which_season == 5])
 
-    winter_data = np.concatenate(winter_data)
-    spring_data = np.concatenate(spring_data)
-    summer_data = np.concatenate(summer_data)
-    autumn_data = np.concatenate(autumn_data)
+    vort_by_season = dict(
+        spring=np.concatenate(spring_data),
+        summer=np.concatenate(summer_data),
+        autumn=np.concatenate(autumn_data),
+        winter=np.concatenate(winter_data),
+    )
 
-    return spring_data, summer_data, autumn_data, winter_data
+    return vort_by_season
