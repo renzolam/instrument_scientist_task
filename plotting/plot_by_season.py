@@ -21,6 +21,7 @@ from typing import Tuple, Union, List, Dict
 from copy import deepcopy, copy
 
 import matplotlib.pyplot as plt
+from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 from matplotlib import colors
 from matplotlib import axes
 from matplotlib.collections import QuadMesh
@@ -195,6 +196,7 @@ def plot_mean_median_counts(
             plot_to_format: QuadMesh,
             plot_type: str,
             row_idx: int,
+            column_idx: int
     ) -> None:
         """
         Formatting which applies to sub-plots which shows vorticities
@@ -216,26 +218,40 @@ def plot_mean_median_counts(
         }
 
         ticks_dict = {
-            'mean': np.arange(-3.0, 3.5, 0.5),
-            'median': np.arange(-3.0, 3.5, 0.5),
+            'mean': np.arange(-3.5, 3.5, 1),
+            'median': np.arange(-3.5, 3.5, 1),
             'count': np.power(10, range(0, 10))
+        }
+
+        season_names = {
+            1: 'Spring',
+            2: 'Summer',
+            3: 'Autumn',
+            4: 'Winter'
         }
 
         ####################
         # Does the formatting
 
-        if row_idx == 0:
+        if row_idx == 1:
             # Plots colorbar only for the 1st row
+            cax = axs[0][column_idx]
+            cax.set_visible(False)
             cbar = fig.colorbar(
                 plot_to_format,
-                ax=ax,
+                ax=cax,
                 orientation='horizontal',
                 location='top',
+                fraction=1,
                 aspect=15,
-                ticks=ticks_dict[plot_type]
+                ticks=ticks_dict[plot_type],
             )
             cbar.ax.tick_params(labelsize=fontsize)
-            cbar.ax.set_title(label_dict[plot_type], fontsize=fontsize, pad=fontsize)
+            cbar.ax.set_title(
+                label_dict[plot_type],
+                fontsize=fontsize * 1.5,
+                pad=fontsize
+            )
 
             # Only label the radial axis for the 1st row to avoid unnecessary duplications
             label_position = ax.get_rlabel_position()
@@ -249,6 +265,15 @@ def plot_mean_median_counts(
             )
         else:
             pass
+
+        # Add subtitles to indicate season
+        if plot_type == 'median':
+            ax.set_title(
+                season_names[row_idx],
+                fontsize=fontsize * 1.5,
+                pad=fontsize * 3,
+                fontweight='bold'
+            )
 
         return None
 
@@ -267,10 +292,10 @@ def plot_mean_median_counts(
             of the Northern Hemisphere
             Made between 2000 and 2005
             """,
-            fontsize=fontsize,
+            fontsize=fontsize * 1.5,
             horizontalalignment='center',
             verticalalignment='center',
-            position=(0.45, 1.0)
+            position=(0.45, 0.97)
         )
 
         return None
@@ -313,7 +338,7 @@ def plot_mean_median_counts(
                 norm=norm
             )
             _common_formatting(ax)
-            _ax_formatting(ax, plot, plot_type, row_idx)
+            _ax_formatting(ax, plot, plot_type, row_idx, column_idx)
 
             return None
 
@@ -327,31 +352,32 @@ def plot_mean_median_counts(
         season_vort = np.array([vort_data_season.vorticity_mHz for vort_data_season in season_data], dtype=float)
         ####################
         # Does the calculations
-        means, medians, counts = [
-            binned_statistic_2d(
-                phi_coords,
-                theta_coords,
-                season_vort,
-                statistic=stat,
-                bins=(phi_edges, theta_edges)
-            ).statistic
-            for stat in ('mean', 'median', 'count')
-        ]
+        stat_data_season = dict(
+            (
+                stat,
+                binned_statistic_2d(
+                    phi_coords,
+                    theta_coords,
+                    season_vort,
+                    statistic=stat,
+                    bins=(phi_edges, theta_edges)
+                ).statistic
+            ) for stat in ('mean', 'median', 'count')
+        )
 
-        assert not np.isnan(counts).any()  # Assert there aren't any invalid values in the counts
+        assert not np.isnan(stat_data_season['count']).any()  # Assert there aren't any invalid values in the counts
 
         # Do not plot bins with fewer counts than a threshold (100 by default)
-        means[counts < count_cutoff] = np.nan
-        medians[counts < count_cutoff] = np.nan
+        stat_data_season['mean'][stat_data_season['count'] < count_cutoff] = np.nan
+        stat_data_season['median'][stat_data_season['count'] < count_cutoff] = np.nan
 
         # Do not plot bins that have 0 counts
-        counts[counts == 0] = np.nan
+        stat_data_season['count'][stat_data_season['count'] == 0] = np.nan
 
         ####################
         # Plots the data
-        __plot_subplot(row_axs[0], means, plot_type='mean')
-        __plot_subplot(row_axs[1], medians, plot_type='median')
-        __plot_subplot(row_axs[2], counts, plot_type='count')
+        for column_idx, stat_type in enumerate(['mean', 'median', 'count']):
+            __plot_subplot(row_axs[column_idx], stat_data_season[stat_type], stat_type)
 
         return None
 
@@ -492,10 +518,11 @@ def plot_mean_median_counts(
     ####################
     # Setting up the plotting routine
 
-    fig, axs = plt.subplots(4, 3, figsize=(36, 70),
-                            subplot_kw={'projection': 'polar'})
+    fig, axs = plt.subplots(5, 3, figsize=(36, 60),
+                            subplot_kw={'projection': 'polar'}, gridspec_kw={'height_ratios': [0.05, 1, 1, 1, 1]})
 
     for row_idx, season_data in enumerate((spring_data, summer_data, autumn_data, winter_data)):
+        row_idx += 1  # 1st row is for colorbar
         _plot_1_season(axs[row_idx])
 
     # Does more formatting
