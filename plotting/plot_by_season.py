@@ -17,7 +17,7 @@ List of functions:
 """
 
 import logging
-from typing import Tuple, Union, List
+from typing import Tuple, Union, List, Dict
 from copy import deepcopy, copy
 
 import matplotlib.pyplot as plt
@@ -215,8 +215,8 @@ def plot_mean_median_counts(
         }
 
         ticks_dict = {
-            'mean': np.arange(-3.0, 3.5, 1.0),
-            'median': np.arange(-3.0, 3.5, 1.0),
+            'mean': np.arange(-3.0, 3.5, 0.5),
+            'median': np.arange(-3.0, 3.5, 0.5),
             'count': np.power(10, range(0, 10))
         }
 
@@ -295,33 +295,9 @@ def plot_mean_median_counts(
 
             # Normalise data for the colorbar if needed
             if plot_type in ('mean', 'median'):
-                all_mean_and_median = np.concatenate((means.flatten(), medians.flatten()))
-                data_min = np.nanmin(all_mean_and_median)
-                data_max = np.nanmax(all_mean_and_median)
-
-                plot_cbar_min = data_min - (data_min % vort_cbar_step)
-                plot_cbar_max = data_max - (data_max % vort_cbar_step) + vort_cbar_step
-
-                norm = colors.Normalize(vmin=plot_cbar_min, vmax=plot_cbar_max)
+                norm = colors.Normalize(vmin=cbar_min_max[plot_type]['min'], vmax=cbar_min_max[plot_type]['max'])
             elif plot_type == 'count':
-                plot_cbar_min = np.power(
-                    10,
-                    np.floor(
-                        np.log10(
-                            np.nanmin(counts)
-                        )
-                    )
-                )
-                plot_cbar_max = np.power(
-                    10,
-                    np.ceil(
-                        np.log10(
-                            np.nanmax(counts)
-                        )
-                    )
-                )
-
-                norm = colors.LogNorm(vmin=plot_cbar_min, vmax=plot_cbar_max)
+                norm = colors.LogNorm(vmin=cbar_min_max[plot_type]['min'], vmax=cbar_min_max[plot_type]['max'])
             else:
                 raise ValueError(f'Plot_type {plot_type} not recognized')
             #########################
@@ -380,6 +356,97 @@ def plot_mean_median_counts(
     else:
         pass
 
+    def _find_min_max_for_colorbar(
+            vort_cbar_step: float = 0.5
+    ) -> Dict[str, Dict[str, float]]:
+
+        seasonal_min_max_dict = dict(
+            (
+                stat_type,
+                {'min': [], 'max': []}
+            ) for stat_type in ('mean', 'median', 'count')
+        )
+
+        for data_by_season in (spring_data, summer_data, autumn_data, winter_data):
+            phi_coords = mlt_to_phi(
+                np.array([vort_data.MLT for vort_data in data_by_season])
+            )
+            theta_coords = lat_to_theta(
+                np.array([getattr(vort_data, f'{coord}_lat_c') for vort_data in data_by_season])
+            )
+            vort_season = np.array(
+                [vort_measurement.vorticity_mHz for vort_measurement in data_by_season]
+            )
+
+            seasonal_data = dict(
+                (stat_type,
+                 binned_statistic_2d(
+                     phi_coords,
+                     theta_coords,
+                     vort_season,
+                     statistic=stat_type,
+                     bins=(phi_edges, theta_edges)
+                 ).statistic
+                 )
+                for stat_type in ('mean', 'median', 'count'))
+
+            # Filtering out unwanted data
+            seasonal_data['count'][seasonal_data['count'] == 0] = np.nan
+            seasonal_data['mean'][seasonal_data['count'] < count_cutoff] = np.nan
+            seasonal_data['median'][seasonal_data['count'] < count_cutoff] = np.nan
+
+            for stat_type in ('mean', 'median', 'count'):
+                seasonal_min_max_dict[stat_type]['min'].append(np.nanmin(seasonal_data[stat_type]))
+                seasonal_min_max_dict[stat_type]['max'].append(np.nanmax(seasonal_data[stat_type]))
+
+        overall_min_max = dict(
+            (
+                stat_type,
+                {
+                    'min': np.nanmin(seasonal_min_max_dict[stat_type]['min']),
+                    'max': np.nanmax(seasonal_min_max_dict[stat_type]['max'])
+                }
+            )
+            for stat_type in ('mean', 'median', 'count')
+        )
+
+        cbar_min_max_output = {
+            'count':
+                {
+                    'min':
+                        np.power(
+                            10,
+                            np.floor(
+                                np.log10(
+                                    overall_min_max['count']['min']
+                                )
+                            )
+                        ),
+                    'max':
+                        np.power(
+                            10,
+                            np.ceil(
+                                np.log10(
+                                    overall_min_max['count']['max']
+                                )
+                            )
+                        )
+                },
+            'mean':
+                {
+                    'min': overall_min_max['mean']['min'] - (overall_min_max['mean']['min'] % vort_cbar_step),
+                    'max': overall_min_max['mean']['max'] - (overall_min_max['mean']['max'] % vort_cbar_step) + vort_cbar_step
+                },
+            'median':
+                {
+                    'min': overall_min_max['median']['min'] - (overall_min_max['median']['min'] % vort_cbar_step),
+                    'max': overall_min_max['median']['max'] - (
+                                overall_min_max['median']['max'] % vort_cbar_step) + vort_cbar_step
+                }
+        }
+
+        return cbar_min_max_output
+
     ####################
     # Creates bin edges
 
@@ -392,6 +459,7 @@ def plot_mean_median_counts(
 
     # All edges of the bins for THETA
     vort_array = np.concatenate([winter_data, spring_data, summer_data, autumn_data])
+
     min_lat = np.min(
         np.array([getattr(vort_data, f'{coord}_lat_c') for vort_data in vort_array])
     )
@@ -402,6 +470,9 @@ def plot_mean_median_counts(
 
     theta_edges = create_bin_edges((0, max_theta), d_theta_deg)
 
+    ####################
+    # Sets up the values needed for the common color-bars
+    cbar_min_max = _find_min_max_for_colorbar()
     ####################
     # Setting up the plotting routine
 
