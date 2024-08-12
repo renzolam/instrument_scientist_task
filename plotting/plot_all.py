@@ -17,7 +17,6 @@ List of functions:
 """
 
 import logging
-from typing import Tuple, Union
 from copy import deepcopy, copy
 
 import matplotlib.pyplot as plt
@@ -29,80 +28,12 @@ import numpy as np
 from numpy.typing import NDArray
 from scipy.stats import binned_statistic_2d
 
-from common_utils import log_utils
+from common_utils import log_utils, plot_utils
 from classes.map_params_cls import MapParams
 from classes.main_runparams_cls import MainRunParams
 
 logger = logging.getLogger(__name__)
 log_utils.set_logger(logger)
-
-
-def create_bin_edges(
-        lims: Tuple[float, float],
-        bin_size: float
-) -> NDArray:
-    edges = np.arange(lims[0], lims[1] + bin_size, bin_size)
-
-    return edges
-
-
-def mlt_to_phi(mlt: Union[NDArray, float]) -> Union[NDArray, float]:
-    """
-    Converts MLT values to phi values, defined as
-    angles in RADIANS from the magnetic midnight (facing away from the sun)
-    
-    Parameters
-    ----------
-    mlt: Union[NDArray, float]
-        MLT values
-
-    Returns
-    -------
-
-    """
-
-    phi = (mlt / 24) * (2 * np.pi)
-
-    return phi
-
-
-def lat_to_theta(lat: Union[NDArray, float]) -> Union[NDArray, float]:
-    """
-        Converts latitude values to theta values, defined as
-        angles in DEGREES from the magnetic pole
-
-        Parameters
-        ----------
-        lat: Union[NDArray, float]
-            latitude values
-
-        Returns
-        -------
-
-        """
-
-    theta = 90 - lat
-
-    return theta
-
-
-def theta_to_lat(theta: Union[NDArray, float]) -> Union[NDArray, float]:
-    """
-        Converts theta values (see below) to latitude values
-
-        Parameters
-        ----------
-        theta: Union[NDArray, float]
-            angles in DEGREES from the magnetic pole
-
-        Returns
-        -------
-
-        """
-
-    lat = 90 - theta
-
-    return lat
 
 
 def plot_mean_median_counts(
@@ -171,7 +102,7 @@ def plot_mean_median_counts(
         r_ticks = np.arange(0, max_theta_for_plot + 5, 5)
         ax.set_yticks(r_ticks)
         ax.set_yticklabels(
-            [int(lat) for lat in theta_to_lat(r_ticks)],
+            [int(lat) for lat in plot_utils.theta_to_lat(r_ticks)],
             fontsize=fontsize
         )
 
@@ -339,10 +270,10 @@ def plot_mean_median_counts(
         pass
 
     # Extracts data
-    phi_coords = mlt_to_phi(
+    phi_coords = plot_utils.mlt_to_phi(
         np.array([vort_data.MLT for vort_data in vort_array])
     )
-    theta_coords = lat_to_theta(
+    theta_coords = plot_utils.lat_to_theta(
         np.array([getattr(vort_data, f'{coord}_lat_c') for vort_data in vort_array])
     )
     vort_data = np.array(
@@ -353,11 +284,11 @@ def plot_mean_median_counts(
     # Creates bin edges
 
     # Bin sizes
-    d_phi_rad = mlt_to_phi(map_params.mlt_bin_size_hr)
+    d_phi_rad = plot_utils.mlt_to_phi(map_params.mlt_bin_size_hr)
     d_theta_deg = deepcopy(map_params.lat_bin_size_degree)
 
     # All edges of the bins for PHI
-    phi_edges = create_bin_edges((0, 2 * np.pi), d_phi_rad)
+    phi_edges = plot_utils.create_bin_edges((0, 2 * np.pi), d_phi_rad)
 
     # All edges of the bins for THETA
     min_lat = np.min(
@@ -368,7 +299,7 @@ def plot_mean_median_counts(
                     + map_params.lat_bin_size_degree)
     max_theta = 90 - min_lat_edge
 
-    theta_edges = create_bin_edges((0, max_theta), d_theta_deg)
+    theta_edges = plot_utils.create_bin_edges((0, max_theta), d_theta_deg)
     ####################
     # Does the calculations
 
