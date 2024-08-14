@@ -38,7 +38,7 @@ class MapParams:
     def __init__(self):
 
         # Setting values
-        json_path = Path(__file__).parent.parent / "runparams" / "map_params.json"
+        json_path = Path(__file__).parent.parent / "params" / "plot_params.json"
 
         with open(json_path, "r") as f:
             paramsdict = json.load(f, object_hook=lambda x: SimpleNamespace(**x))

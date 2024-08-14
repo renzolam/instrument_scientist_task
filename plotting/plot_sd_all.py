@@ -39,19 +39,19 @@ logger = logging.getLogger(__name__)
 log_utils.set_logger(logger)
 
 stat_type_full_name = {
-    'std': 'standard deviation',
-    'min': 'min magnitude',
-    'max': 'max magnitude',
+    "std": "standard deviation",
+    "min": "min magnitude",
+    "max": "max magnitude",
 }
 
 
 def _ax_formatting(
-        fig: figure,
-        ax: axes,
-        plot_to_format: QuadMesh,
-        stat_type: str,
-        coord: str,
-        fontsize: float,
+    fig: figure,
+    ax: axes,
+    plot_to_format: QuadMesh,
+    stat_type: str,
+    coord: str,
+    fontsize: float,
 ) -> None:
     """
     Formatting which applies to sub-plots specifically
@@ -122,7 +122,7 @@ def _ax_formatting(
 
 
 def _fig_formatting(
-        fig: figure, all_vort: NDArray[VortMeasurement], fontsize: float
+    fig: figure, all_vort: NDArray[VortMeasurement], fontsize: float
 ) -> None:
     """
     Does formatting that is not specific to any subplot
@@ -163,15 +163,15 @@ def _fig_formatting(
 
 
 def _plot_subplot(
-        phi_edges: NDArray,
-        theta_edges: NDArray,
-        fig: figure,
-        ax: axes,
-        stat_data: Dict[str, NDArray],
-        stat_type: str,
-        max_theta: float,
-        coord: str,
-        fontsize: float,
+    phi_edges: NDArray,
+    theta_edges: NDArray,
+    fig: figure,
+    ax: axes,
+    stat_data: Dict[str, NDArray],
+    stat_type: str,
+    max_theta: float,
+    coord: str,
+    fontsize: float,
 ) -> None:
     """
     Plots a subplot
@@ -235,12 +235,12 @@ the lowest value for {stat_type_full_name[stat_type]} is {stat_min}
 
 
 def plot_sd_max_min(
-        main_params: MainRunParams,
-        map_params: MapParams,
-        vort_array: NDArray,
-        coord: str = "aacgm",
-        count_cutoff: int = 120,
-        fontsize=40,
+    main_params: MainRunParams,
+    map_params: MapParams,
+    vort_array: NDArray,
+    coord: str = "aacgm",
+    count_cutoff: int = 120,
+    fontsize=40,
 ):
     """
     Plot the standard distribution (s.d.), min and max absolute values at different MLT and latitudes for
@@ -308,9 +308,9 @@ def plot_sd_max_min(
         np.array([getattr(vort_data, f"{coord}_lat_c") for vort_data in vort_array])
     )
     min_lat_edge = (
-            min_lat
-            - (min_lat % map_params.lat_bin_size_degree)
-            + map_params.lat_bin_size_degree
+        min_lat
+        - (min_lat % map_params.lat_bin_size_degree)
+        + map_params.lat_bin_size_degree
     )
     max_theta = 90 - min_lat_edge
 
@@ -332,7 +332,7 @@ def plot_sd_max_min(
         for stat_type in ("std", "count")
     )
 
-    for stat_type in ('min', 'max'):
+    for stat_type in ("min", "max"):
         stat_data[stat_type] = binned_statistic_2d(
             phi_coords,
             theta_coords,
@@ -346,7 +346,7 @@ def plot_sd_max_min(
     ).any()  # Assert there aren't any invalid values in the counts
 
     # Do not plot bins with fewer counts than a threshold (100 by default)
-    for stat_type in ("std", "max", 'min'):
+    for stat_type in ("std", "max", "min"):
         stat_data[stat_type][stat_data["count"] < count_cutoff] = np.nan
 
     # Do not plot bins that have 0 counts

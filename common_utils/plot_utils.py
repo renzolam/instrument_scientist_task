@@ -18,8 +18,8 @@ List of functions:
 
 import logging
 from typing import Tuple, Union
+import warnings
 
-from matplotlib import pyplot as plt
 from matplotlib import axes
 import numpy as np
 from numpy.typing import NDArray
@@ -145,9 +145,12 @@ def _common_formatting(ax: axes, fontsize: float, max_theta: float) -> None:
     # Ticks
 
     # Ticks in MLT
-    ax.set_xticklabels(
-        ["00\nMLT", "", "06\nMLT", "", "12\nMLT", "", "18\nMLT", ""], fontsize=fontsize
-    )
+    with warnings.catch_warnings():
+        warnings.filterwarnings("ignore", category=UserWarning)
+        ax.set_xticklabels(
+            ["00\nMLT", "", "06\nMLT", "", "12\nMLT", "", "18\nMLT", ""],
+            fontsize=fontsize,
+        )
 
     # Ticks in latitude
     r_ticks = np.arange(0, max_theta_for_plot + 5, 5)

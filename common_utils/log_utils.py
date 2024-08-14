@@ -12,7 +12,7 @@ Summary       : Sets up loggers
 import logging
 from copy import copy
 
-from runparams import common_params
+from params import common_params
 
 
 def set_logger(logger_2_set: logging.Logger) -> None:

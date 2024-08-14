@@ -44,8 +44,8 @@ def separate_by_seasons(
     """
 
     # Initialisation
-    ts = load.timescale()
-    eph = load("de421.bsp")
+    ts = load.timescale()  # Create timescale object
+    eph = load("de421.bsp")  # Loads JPL ephemeris (covers 1900 - 2050)
 
     all_timestamps = np.array(
         [datetime.timestamp(vort_data.utc_time) for vort_data in vort_array]
@@ -58,13 +58,15 @@ def separate_by_seasons(
         first_day = ts.utc(year, 1, 1)
         lasy_day = ts.utc(year, 12, 31)
 
-        t, _ = almanac.find_discrete(first_day, lasy_day, almanac.seasons(eph))
+        season_start_t, _ = almanac.find_discrete(
+            first_day, lasy_day, almanac.seasons(eph)
+        )  # Find when did the seasons change
 
         season_edges = [
             datetime.timestamp(
                 datetime.fromisoformat(ti.utc_iso()[:-1]).replace(tzinfo=timezone.utc)
             )
-            for ti in t
+            for ti in season_start_t
         ]
         season_edges.insert(
             0, datetime.timestamp(datetime(year, 1, 1, 0, 0, tzinfo=timezone.utc))

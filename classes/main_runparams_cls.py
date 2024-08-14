@@ -31,7 +31,7 @@ class MainRunParams:
 
     def __init__(self):
 
-        json_path = Path(__file__).parent.parent / "runparams" / "main_runparams.json"
+        json_path = Path(__file__).parent.parent / "params" / "main_params.json"
 
         with open(json_path, "r") as f:
             paramsdict = json.load(f, object_hook=lambda x: SimpleNamespace(**x))

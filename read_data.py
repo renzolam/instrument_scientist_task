@@ -25,7 +25,7 @@ from numpy.typing import NDArray
 
 from common_utils import log_utils
 from classes import main_runparams_cls
-from runparams import common_params
+from params import common_params
 from classes.data_class import VortMeasurement
 
 logger = logging.getLogger(__name__)

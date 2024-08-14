@@ -252,14 +252,14 @@ def _find_min_max_for_colorbar(
             )
             for stat_type in ("std", "count")
         )
-        for stat_type in ('max', 'min'):
+        for stat_type in ("max", "min"):
             seasonal_data[stat_type] = binned_statistic_2d(
-                    phi_coords,
-                    theta_coords,
-                    abs_vort_season,
-                    statistic=stat_type,
-                    bins=(phi_edges, theta_edges),
-                ).statistic
+                phi_coords,
+                theta_coords,
+                abs_vort_season,
+                statistic=stat_type,
+                bins=(phi_edges, theta_edges),
+            ).statistic
 
         # Filtering out unwanted data
         for stat_type in ("std", "max", "min"):
@@ -440,14 +440,14 @@ def _plot_1_season(
         )
         for stat in ("std", "count")
     )
-    for stat_type in ('max', 'min'):
+    for stat_type in ("max", "min"):
         stat_data_season[stat_type] = binned_statistic_2d(
-                    phi_coords,
-                    theta_coords,
-                    abs_season_vort,
-                    statistic=stat_type,
-                    bins=(phi_edges, theta_edges),
-                ).statistic
+            phi_coords,
+            theta_coords,
+            abs_season_vort,
+            statistic=stat_type,
+            bins=(phi_edges, theta_edges),
+        ).statistic
 
     assert not np.isnan(
         stat_data_season["count"]

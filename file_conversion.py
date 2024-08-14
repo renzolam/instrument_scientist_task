@@ -22,7 +22,7 @@ from copy import deepcopy
 import numpy as np
 
 from common_utils import log_utils
-from runparams import common_params
+from params import common_params
 from classes.main_runparams_cls import MainRunParams
 
 logger = logging.getLogger(__name__)
