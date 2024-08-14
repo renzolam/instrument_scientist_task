@@ -40,8 +40,8 @@ log_utils.set_logger(logger)
 
 stat_type_full_name = {
     'std': 'standard deviation',
-    'min': 'Min Magnitude',
-    'max': 'Max Magnitude',
+    'min': 'min magnitude',
+    'max': 'max magnitude',
 }
 
 
