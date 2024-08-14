@@ -21,7 +21,6 @@ from numpy.typing import NDArray
 from scipy.stats import binned_statistic_2d
 
 from common_utils import log_utils, plot_utils
-from classes.main_runparams_cls import MainRunParams
 from classes.plot_params_cls import PlotParams
 from classes.data_class import VortMeasurement
 from params import common_params
@@ -103,6 +102,29 @@ def formatting(
         fontsize: float,
         linewidth: float
 ) -> None:
+    """
+    Does all the formatting needed
+
+    Parameters
+    ----------
+    vort_by_season: Dict[str, NDArray[VortMeasurement]]
+        Used
+    fig: figure
+        fig object to be formatted
+    ax: axes
+        axes object to be formatted
+    plot_params: PlotParams
+        Used here to decide which data falls within the latitude range set in plot_params
+    fontsize: float
+        Size of the fonts (in general)
+    linewidth: float
+        Width of the lines (in general)
+
+    Returns
+    -------
+
+    """
+
 
     # Find the range of years covered
     all_vort = np.concatenate(list(vort_by_season.values()))
@@ -220,6 +242,24 @@ def plot(
         fontsize=40,
         linewidth=5
 ) -> None:
+    """
+    Plot the R1 vorticities by plotting the average vorticity (across a specified range of AACGM latitudes) vs MLT
+
+    Parameters
+    ----------
+    plot_params: PlotParams
+        Used here to decide which data falls within the latitude range set in plot_params
+    vort_by_season: Dict[str, NDArray[VortMeasurement]]
+        All vorticity data separated by seasons
+    fontsize: float
+        Size of the fonts (in general)
+    linewidth: float
+        Width of the lines (in general)
+
+    Returns
+    -------
+
+    """
 
     season_colours = {
         'spring': '#72B01D',
