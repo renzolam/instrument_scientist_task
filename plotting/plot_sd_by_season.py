@@ -3,11 +3,11 @@ Author        : Pak Yin (Renzo) Lam
                 British Antarctic Survey
                 paklam@bas.ac.uk
 
-Date Created  : 2024-08-10
-Last Modified : 2024-08-12
+Date Created  : 2024-08-14
+Last Modified : 2024-08-14
 
-Summary       : Plots statistical analysis (mean, median and number of data points) for vorticity data according
-to their seasons
+Summary       : Plots the standard distribution (s.d.), min and max absolute values at different MLT and latitudes
+according to their seasons
 
 List of functions:
 - _ax_formatting
@@ -77,15 +77,15 @@ def _ax_formatting(
     """
 
     label_dict = {
-        0: "Mean Vorticity (mHz)",
-        1: "Median Vorticity (mHz)",
-        2: "Number of Data Points",
+        0: "Standard Deviations (mHz)",
+        1: "Max Vorticity Magnitudes (mHz)",
+        2: "Min Vorticity Magnitudes (mHz)",
     }
 
     ticks_dict = {
-        0: np.arange(-3.5, 3.5, 1),
-        1: np.arange(-3.5, 3.5, 1),
-        2: np.power(10, range(0, 10)),
+        0: np.arange(1, 15, 1),
+        1: np.arange(0, 90, 10),
+        2: np.arange(0, 0.3, 0.02),
     }
 
     season_names = {1: "Spring", 2: "Summer", 3: "Autumn", 4: "Winter"}
@@ -106,7 +106,7 @@ def _ax_formatting(
             orientation="horizontal",
             location="top",
             fraction=1,
-            aspect=15,
+            aspect=25,
             ticks=ticks_dict[column_idx],
         )
         cbar.ax.tick_params(labelsize=fontsize, length=fontsize / 2, width=fontsize / 6)
@@ -167,11 +167,12 @@ def _fig_formatting(
 
     fig.suptitle(
         f"""
-        Mean, Median, and Number of Data Points 
-        for Vorticity Measurements
-        of the Northern Hemisphere
-        (Separated by Season)
-        In the Period {min_year} - {max_year}
+        Standard Deviation (s.d.), 
+        Min and Max Absolute Values 
+        of Vorticity Measurements
+        in the Northern Hemisphere
+        (Separated by Seasons)
+        During the Period {min_year} - {max_year}
         """,
         fontsize=fontsize * 1.5,
         horizontalalignment="center",
@@ -216,7 +217,7 @@ def _find_min_max_for_colorbar(
     """
 
     seasonal_min_max_dict = dict(
-        (stat_type, {"min": [], "max": []}) for stat_type in ("mean", "median", "count")
+        (stat_type, {"min": [], "max": []}) for stat_type in ("std", "max", "min")
     )
 
     for vort_1_season in [
@@ -233,7 +234,11 @@ def _find_min_max_for_colorbar(
         vort_season = np.array(
             [vort_measurement.vorticity_mHz for vort_measurement in vort_1_season]
         )
-
+        abs_vort_season = np.abs(
+            [vort_measurement.vorticity_mHz for vort_measurement in vort_1_season]
+        )
+        ###################
+        # Calculating the stats for each season
         seasonal_data = dict(
             (
                 stat_type,
@@ -245,15 +250,23 @@ def _find_min_max_for_colorbar(
                     bins=(phi_edges, theta_edges),
                 ).statistic,
             )
-            for stat_type in ("mean", "median", "count")
+            for stat_type in ("std", "count")
         )
+        for stat_type in ('max', 'min'):
+            seasonal_data[stat_type] = binned_statistic_2d(
+                    phi_coords,
+                    theta_coords,
+                    abs_vort_season,
+                    statistic=stat_type,
+                    bins=(phi_edges, theta_edges),
+                ).statistic
 
         # Filtering out unwanted data
+        for stat_type in ("std", "max", "min"):
+            seasonal_data[stat_type][seasonal_data["count"] < count_cutoff] = np.nan
         seasonal_data["count"][seasonal_data["count"] == 0] = np.nan
-        seasonal_data["mean"][seasonal_data["count"] < count_cutoff] = np.nan
-        seasonal_data["median"][seasonal_data["count"] < count_cutoff] = np.nan
 
-        for stat_type in ("mean", "median", "count"):
+        for stat_type in ("std", "max", "min"):
             seasonal_min_max_dict[stat_type]["min"].append(
                 np.nanmin(seasonal_data[stat_type])
             )
@@ -270,42 +283,42 @@ def _find_min_max_for_colorbar(
                 "max": np.nanmax(seasonal_min_max_dict[stat_type]["max"]),
             },
         )
-        for stat_type in ("mean", "median", "count")
+        for stat_type in ("std", "max", "min")
     )
 
     # Determine the limits for the colorbar based on the min and max values present across all seasons
-    cbar_min_max_output = {
-        "count": {
-            "min": np.power(10, np.floor(np.log10(overall_min_max["count"]["min"]))),
-            "max": np.power(10, np.ceil(np.log10(overall_min_max["count"]["max"]))),
-        },
-        "mean": {
-            "min": overall_min_max["mean"]["min"]
-            - (overall_min_max["mean"]["min"] % vort_cbar_step),
-            "max": overall_min_max["mean"]["max"]
-            - (overall_min_max["mean"]["max"] % vort_cbar_step)
-            + vort_cbar_step,
-        },
-        "median": {
-            "min": overall_min_max["median"]["min"]
-            - (overall_min_max["median"]["min"] % vort_cbar_step),
-            "max": overall_min_max["median"]["max"]
-            - (overall_min_max["median"]["max"] % vort_cbar_step)
-            + vort_cbar_step,
-        },
-    }
+    # cbar_min_max_output = {
+    #     "std": {
+    #         "min": np.power(10, np.floor(np.log10(overall_min_max["count"]["min"]))),
+    #         "max": np.power(10, np.ceil(np.log10(overall_min_max["count"]["max"]))),
+    #     },
+    #     "max": {
+    #         "min": overall_min_max["mean"]["min"]
+    #         - (overall_min_max["mean"]["min"] % vort_cbar_step),
+    #         "max": overall_min_max["mean"]["max"]
+    #         - (overall_min_max["mean"]["max"] % vort_cbar_step)
+    #         + vort_cbar_step,
+    #     },
+    #     "min": {
+    #         "min": overall_min_max["median"]["min"]
+    #         - (overall_min_max["median"]["min"] % vort_cbar_step),
+    #         "max": overall_min_max["median"]["max"]
+    #         - (overall_min_max["median"]["max"] % vort_cbar_step)
+    #         + vort_cbar_step,
+    #     },
+    # }
+    #
+    # # Make the colorbar symmetric about 0 for means and medians. Assumes max val > 0
+    # for stat_type in ("mean", "median"):
+    #     min_for_stat = cbar_min_max_output[stat_type]["min"]
+    #     max_for_stat = cbar_min_max_output[stat_type]["max"]
+    #
+    #     biggest_abs_val = np.max([np.abs(min_for_stat), np.abs(max_for_stat)])
+    #
+    #     cbar_min_max_output[stat_type]["min"] = -biggest_abs_val
+    #     cbar_min_max_output[stat_type]["max"] = biggest_abs_val
 
-    # Make the colorbar symmetric about 0 for means and medians. Assumes max val > 0
-    for stat_type in ("mean", "median"):
-        min_for_stat = cbar_min_max_output[stat_type]["min"]
-        max_for_stat = cbar_min_max_output[stat_type]["max"]
-
-        biggest_abs_val = np.max([np.abs(min_for_stat), np.abs(max_for_stat)])
-
-        cbar_min_max_output[stat_type]["min"] = -biggest_abs_val
-        cbar_min_max_output[stat_type]["max"] = biggest_abs_val
-
-    return cbar_min_max_output
+    return overall_min_max
 
 
 def __plot_subplot(
@@ -355,19 +368,12 @@ def __plot_subplot(
     """
 
     # Initialisation
-    colour_map_dict = {0: "RdBu", 1: "RdBu", 2: "jet"}
+    colour_map_dict = {0: "jet", 1: "jet", 2: "jet"}
 
     # Normalise data for the colorbar if needed
-    if column_idx in (0, 1):
-        norm = colors.Normalize(
-            vmin=cbar_min_max[plot_type]["min"], vmax=cbar_min_max[plot_type]["max"]
-        )
-    elif column_idx == 2:
-        norm = colors.LogNorm(
-            vmin=cbar_min_max[plot_type]["min"], vmax=cbar_min_max[plot_type]["max"]
-        )
-    else:
-        raise ValueError(f"Column index {column_idx} not recognized")
+    norm = colors.Normalize(
+        vmin=cbar_min_max[plot_type]["min"], vmax=cbar_min_max[plot_type]["max"]
+    )
     #########################
     # Actual plotting
     plot = axs[row_idx][column_idx].pcolormesh(
@@ -415,6 +421,10 @@ def _plot_1_season(
         [vort_data_season.vorticity_mHz for vort_data_season in data_1_season],
         dtype=float,
     )
+    abs_season_vort = np.abs(
+        [vort_data_season.vorticity_mHz for vort_data_season in data_1_season],
+        dtype=float,
+    )
     ####################
     # Does the calculations
     stat_data_season = dict(
@@ -428,23 +438,31 @@ def _plot_1_season(
                 bins=(phi_edges, theta_edges),
             ).statistic,
         )
-        for stat in ("mean", "median", "count")
+        for stat in ("std", "count")
     )
+    for stat_type in ('max', 'min'):
+        stat_data_season[stat_type] = binned_statistic_2d(
+                    phi_coords,
+                    theta_coords,
+                    abs_season_vort,
+                    statistic=stat_type,
+                    bins=(phi_edges, theta_edges),
+                ).statistic
 
     assert not np.isnan(
         stat_data_season["count"]
     ).any()  # Assert there aren't any invalid values in the counts
 
-    # Do not plot bins with fewer counts than a threshold (100 by default)
-    stat_data_season["mean"][stat_data_season["count"] < count_cutoff] = np.nan
-    stat_data_season["median"][stat_data_season["count"] < count_cutoff] = np.nan
+    # Do not plot bins with fewer counts than a threshold
+    for stat_type in ("std", "max", "min"):
+        stat_data_season[stat_type][stat_data_season["count"] < count_cutoff] = np.nan
 
     # Do not plot bins that have 0 counts
     stat_data_season["count"][stat_data_season["count"] == 0] = np.nan
 
     ####################
     # Plots the data
-    for column_idx, stat_type in enumerate(["mean", "median", "count"]):
+    for column_idx, stat_type in enumerate(["std", "max", "min"]):
         __plot_subplot(
             fig,
             axs,
@@ -462,12 +480,12 @@ def _plot_1_season(
     return None
 
 
-def plot_mean_median_counts(
+def plot(
     main_params: MainRunParams,
     map_params: MapParams,
     vort_by_season: Dict[str, NDArray[VortMeasurement]],
     coord: str = "aacgm",
-    count_cutoff: int = 100,
+    count_cutoff: int = 120,
     fontsize=40,
 ):
     """
@@ -581,6 +599,6 @@ def plot_mean_median_counts(
     if not plot_dir.exists():
         plot_dir.mkdir(parents=True)
 
-    plt.savefig(plot_dir / "avg_median_counts_(by_season).png", bbox_inches="tight")
+    plt.savefig(plot_dir / "sd_abs_max_min_(by_season).png", bbox_inches="tight")
 
     return None

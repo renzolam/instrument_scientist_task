@@ -19,7 +19,7 @@ from common_utils import log_utils
 from runparams import common_params
 import read_data
 import file_conversion
-from plotting import plot_avg_all, plot_avg_by_season
+from plotting import plot_avg_all, plot_avg_by_season, plot_sd_all, plot_sd_by_season
 import season_analysis
 
 if __name__ == "__main__":
@@ -56,10 +56,14 @@ if __name__ == "__main__":
         vort_by_season = season_analysis.separate_by_seasons(all_vort)
 
         ###################################
-        # Produce plot for map of mean and median values
-        plot_avg_all.plot_mean_median_counts(main_params, map_params, all_vort)
+        # Produces plots for mean, median and number of data points
+        # plot_avg_all.plot_mean_median_counts(main_params, map_params, all_vort)
+        #
+        # plot_avg_by_season.plot_mean_median_counts(main_params, map_params, vort_by_season)
 
-        plot_avg_by_season.plot_mean_median_counts(main_params, map_params, vort_by_season)
+        # Produces plots that show distribution of data
+        # plot_sd_all.plot_sd_max_min(main_params, map_params, all_vort)
+        plot_sd_by_season.plot(main_params, map_params, vort_by_season)
 
     except Exception as e:
         logger.exception(e)
