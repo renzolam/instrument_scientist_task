@@ -19,14 +19,14 @@ from common_utils import log_utils
 from params import common_params
 import read_data
 import file_conversion
-from plotting import plot_avg_all, plot_avg_by_season, plot_sd_all, plot_sd_by_season
+from plotting import avg_all, avg_by_season, sd_all, sd_by_season, r1_avg_vs_mlt
 import season_analysis
 
 if __name__ == "__main__":
 
     # Initialisation
     main_params = main_runparams_cls.MainRunParams()
-    map_params = PlotParams()
+    plot_params = PlotParams()
 
     logger = logging.getLogger(__name__)
     log_utils.set_logger(logger)
@@ -57,15 +57,18 @@ if __name__ == "__main__":
 
         ###################################
         # Produces plots for mean, median and number of data points
-        plot_avg_all.plot_mean_median_counts(main_params, map_params, all_vort)
+        # avg_all.plot_mean_median_counts(main_params, plot_params, all_vort)
+        #
+        # avg_by_season.plot_mean_median_counts(
+        #     main_params, plot_params, vort_by_season
+        # )
+        #
+        # # Produces plots that show distribution of data
+        # sd_all.plot_sd_max_min(main_params, plot_params, all_vort)
+        # sd_by_season.plot(main_params, plot_params, vort_by_season)
 
-        plot_avg_by_season.plot_mean_median_counts(
-            main_params, map_params, vort_by_season
-        )
-
-        # Produces plots that show distribution of data
-        plot_sd_all.plot_sd_max_min(main_params, map_params, all_vort)
-        plot_sd_by_season.plot(main_params, map_params, vort_by_season)
+        # Analyses the R1 vorticities
+        r1_avg_vs_mlt.plot(plot_params, vort_by_season)
 
     except Exception as e:
         logger.exception(e)

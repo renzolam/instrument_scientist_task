@@ -4,7 +4,7 @@ Author        : Pak Yin (Renzo) Lam
                 paklam@bas.ac.uk
 
 Date Created  : 2024-08-10
-Last Modified : 2024-08-12
+Last Modified : 2024-08-14
 
 Summary       : Plots the mean, median and number of data points for all data
 
@@ -21,9 +21,7 @@ from typing import Dict
 
 import matplotlib.pyplot as plt
 
-from matplotlib import colors
-from matplotlib import figure
-from matplotlib import axes
+from matplotlib import colors, figure, axes
 from matplotlib.collections import QuadMesh
 import numpy as np
 from numpy.typing import NDArray
@@ -33,6 +31,7 @@ from common_utils import log_utils, plot_utils
 from classes.plot_params_cls import PlotParams
 from classes.main_runparams_cls import MainRunParams
 from classes.data_class import VortMeasurement
+from params import common_params
 
 logger = logging.getLogger(__name__)
 log_utils.set_logger(logger)
@@ -243,7 +242,7 @@ def _plot_subplot(
 
 def plot_mean_median_counts(
     main_params: MainRunParams,
-    map_params: PlotParams,
+    plot_params: PlotParams,
     vort_array: NDArray,
     coord: str = "aacgm",
     count_cutoff: int = 100,
@@ -265,7 +264,7 @@ def plot_mean_median_counts(
 
     main_params: MainRunParams
         Used here to get location of where the plot should be saved to
-    map_params: PlotParams
+    plot_params: PlotParams
         Used here for knowing the bin sizes to use for the plot
     vort_array: List[VortMeasurement]
         List of VortMeasurement objects, each of which contain data for a measurement made
@@ -301,8 +300,8 @@ def plot_mean_median_counts(
     # Creates bin edges
 
     # Bin sizes
-    d_phi_rad = plot_utils.mlt_to_phi(map_params.mlt_bin_size_hr)
-    d_theta_deg = deepcopy(map_params.lat_bin_size_degree)
+    d_phi_rad = plot_utils.mlt_to_phi(plot_params.mlt_bin_size_hr)
+    d_theta_deg = deepcopy(plot_params.lat_bin_size_degree)
 
     # All edges of the bins for PHI
     phi_edges = plot_utils.create_bin_edges((0, 2 * np.pi), d_phi_rad)
@@ -312,9 +311,9 @@ def plot_mean_median_counts(
         np.array([getattr(vort_data, f"{coord}_lat_c") for vort_data in vort_array])
     )
     min_lat_edge = (
-        min_lat
-        - (min_lat % map_params.lat_bin_size_degree)
-        + map_params.lat_bin_size_degree
+            min_lat
+            - (min_lat % plot_params.lat_bin_size_degree)
+            + plot_params.lat_bin_size_degree
     )
     max_theta = 90 - min_lat_edge
 
@@ -370,10 +369,6 @@ def plot_mean_median_counts(
     fig.tight_layout()
 
     # Saving the file
-    plot_dir = main_params.output_dir / "plots"
-    if not plot_dir.exists():
-        plot_dir.mkdir(parents=True)
-
-    plt.savefig(plot_dir / "avg_median_counts_(all_data).png", bbox_inches="tight")
+    plt.savefig(common_params.plot_dir / "avg_median_counts_(all_data).png", bbox_inches="tight")
 
     return None
