@@ -30,7 +30,7 @@ from numpy.typing import NDArray
 from scipy.stats import binned_statistic_2d
 
 from common_utils import log_utils, plot_utils
-from classes.map_params_cls import MapParams
+from classes.plot_params_cls import PlotParams
 from classes.main_runparams_cls import MainRunParams
 from classes.data_class import VortMeasurement
 
@@ -243,7 +243,7 @@ def _plot_subplot(
 
 def plot_mean_median_counts(
     main_params: MainRunParams,
-    map_params: MapParams,
+    map_params: PlotParams,
     vort_array: NDArray,
     coord: str = "aacgm",
     count_cutoff: int = 100,
@@ -265,7 +265,7 @@ def plot_mean_median_counts(
 
     main_params: MainRunParams
         Used here to get location of where the plot should be saved to
-    map_params: MapParams
+    map_params: PlotParams
         Used here for knowing the bin sizes to use for the plot
     vort_array: List[VortMeasurement]
         List of VortMeasurement objects, each of which contain data for a measurement made

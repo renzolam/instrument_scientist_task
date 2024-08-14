@@ -14,7 +14,7 @@ from time import time
 from sys import getsizeof
 
 from classes import main_runparams_cls
-from classes.map_params_cls import MapParams
+from classes.plot_params_cls import PlotParams
 from common_utils import log_utils
 from params import common_params
 import read_data
@@ -26,7 +26,7 @@ if __name__ == "__main__":
 
     # Initialisation
     main_params = main_runparams_cls.MainRunParams()
-    map_params = MapParams()
+    map_params = PlotParams()
 
     logger = logging.getLogger(__name__)
     log_utils.set_logger(logger)

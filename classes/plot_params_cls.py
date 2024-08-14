@@ -27,13 +27,15 @@ logger = logging.getLogger(__name__)
 log_utils.set_logger(logger)
 
 
-class MapParams:
+class PlotParams:
     """
     Class containing all info for creating maps of mean and median values
     """
 
     lat_bin_size_degree: float = 1
     mlt_bin_size_hr: float = 1
+
+    r1_avg_vort_vs_mlt_aacgm_lat_lim: List[float] = [72, 77]
 
     def __init__(self):
 

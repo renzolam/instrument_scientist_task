@@ -1,4 +1,5 @@
 {
   "lat_bin_size_degree": 1,
-  "mlt_bin_size_hr": 1
+  "mlt_bin_size_hr": 1,
+  "r1_avg_vort_vs_mlt_aacgm_lat_lim": [72, 77]
 }
