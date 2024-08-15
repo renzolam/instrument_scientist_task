@@ -22,11 +22,11 @@ class MainRunParams:
     Class containing all info for the run
     """
 
-    abs_data_txt_dir: Path  # The absolute path of the downloaded data file
-    output_dir: Path  # Where all the generated files go to
+    abs_data_txt_dir: Path  # The absolute path of the directory holding the downloaded data file(s)
+    output_dir: Path  # Where all the generated files go
 
     # Whether to use the json files which have been converted from the original txt file
-    # If false, will re-run the function where the txt file will be converted into a series of json files
+    # If true, will turn the txt file(s) into a series of json files, allowing for parallel data retrieval
     txt_files_to_json: bool
 
     def __init__(self):

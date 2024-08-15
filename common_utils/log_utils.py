@@ -4,13 +4,12 @@ Author        : Pak Yin (Renzo) Lam
                 paklam@bas.ac.uk
 
 Date Created  : 2024-08-01
-Last Modified : 2024-08-12
+Last Modified : 2024-08-15
 
 Summary       : Sets up loggers
 """
 
 import logging
-from copy import copy
 
 from params import common_params
 
@@ -29,9 +28,7 @@ def set_logger(logger_2_set: logging.Logger) -> None:
 
     """
 
-    ori_logger = copy(logger_2_set)
-
-    ori_logger.setLevel(logging.INFO)
+    logger_2_set.setLevel(logging.INFO)
 
     formatter = logging.Formatter(
         "\n%(asctime)s - \n%(name)s line %(lineno)s - %(levelname)s: \n%(message)s"
@@ -48,7 +45,7 @@ def set_logger(logger_2_set: logging.Logger) -> None:
     console_handler.setFormatter(formatter)
 
     # Add the handlers to the logger
-    ori_logger.addHandler(file_handler)
-    ori_logger.addHandler(console_handler)
+    logger_2_set.addHandler(file_handler)
+    logger_2_set.addHandler(console_handler)
 
     return None

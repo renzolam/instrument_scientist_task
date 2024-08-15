@@ -3,11 +3,10 @@ Author        : Pak Yin (Renzo) Lam
                 British Antarctic Survey
                 paklam@bas.ac.uk
 
-Date Created  : 2024-08-12
-Last Modified : 2024-08-12
+Date Created  : 2024-08-10
+Last Modified : 2024-08-15
 
-Summary       : Plots the standard distribution (s.d.), min and max absolute values at different MLT and latitudes for
-all data
+Summary       : Plots the mean, median and number of data points for all data
 
 List of functions:
 - _ax_formatting
@@ -20,36 +19,28 @@ import logging
 from copy import deepcopy, copy
 from typing import Dict
 
+import ray
 import matplotlib.pyplot as plt
-
-from matplotlib import colors
-from matplotlib import figure
-from matplotlib import axes
+from matplotlib import colors, figure, axes
 from matplotlib.collections import QuadMesh
 import numpy as np
 from numpy.typing import NDArray
 from scipy.stats import binned_statistic_2d
 
 from common_utils import log_utils, plot_utils
-from classes.map_params_cls import MapParams
-from classes.main_runparams_cls import MainRunParams
+from classes.plot_params_cls import PlotParams
 from classes.data_class import VortMeasurement
+from params import common_params
 
 logger = logging.getLogger(__name__)
 log_utils.set_logger(logger)
-
-stat_type_full_name = {
-    "std": "standard deviation",
-    "min": "min magnitude",
-    "max": "max magnitude",
-}
 
 
 def _ax_formatting(
     fig: figure,
     ax: axes,
     plot_to_format: QuadMesh,
-    stat_type: str,
+    plot_type: str,
     coord: str,
     fontsize: float,
 ) -> None:
@@ -64,7 +55,7 @@ def _ax_formatting(
         axes object to be formatted
     plot_to_format: QuadMesh
         'Image' object to be associated with the colorbar
-    stat_type: str
+    plot_type: str
         Is it mean, median or counts?
     coord: str
         Coordinate system used for latitudes
@@ -78,18 +69,18 @@ def _ax_formatting(
 
     # Initialisation
 
-    assert stat_type in ("std", "max", "min")
+    assert plot_type in ("mean", "median", "count")
 
     label_dict = {
-        "std": "Standard Deviation (mHz)",
-        "max": "Max Vorticity Magnitudes (mHz)",
-        "min": "Min Vorticity Magnitudes (mHz)",
+        "mean": "Mean Vorticity (mHz)",
+        "median": "Median Vorticity (mHz)",
+        "count": "Number of Data Points",
     }
 
     ticks_dict = {
-        "std": np.arange(-80.5, 80.5, 1),
-        "max": np.arange(0, 90, 10),
-        "min": np.arange(0, 0.1, 0.01),
+        "mean": np.arange(-3.5, 3.5, 1),
+        "median": np.arange(-3.5, 3.5, 1),
+        "count": np.power(10, range(0, 10)),
     }
 
     ####################
@@ -102,10 +93,10 @@ def _ax_formatting(
         orientation="horizontal",
         location="top",
         aspect=15,
-        ticks=ticks_dict[stat_type],
+        ticks=ticks_dict[plot_type],
     )
     cbar.ax.tick_params(labelsize=fontsize, length=fontsize / 2, width=fontsize / 6)
-    cbar.ax.set_title(label_dict[stat_type], fontsize=fontsize, pad=fontsize)
+    cbar.ax.set_title(label_dict[plot_type], fontsize=fontsize, pad=fontsize)
 
     # Label for radial axis
     label_position = ax.get_rlabel_position()
@@ -147,11 +138,10 @@ def _fig_formatting(
 
     fig.suptitle(
         f"""
-        Standard Deviation (s.d.), 
-        Min and Max Absolute Values 
-        of Vorticity Measurements
-        in the Northern Hemisphere
-        During the Period {min_year} - {max_year}
+        Mean, Median, and Number of Data Points 
+        for Vorticity Measurements
+        of the Northern Hemisphere
+        In the Period {min_year} - {max_year}
         """,
         fontsize=fontsize,
         horizontalalignment="center",
@@ -166,12 +156,13 @@ def _plot_subplot(
     phi_edges: NDArray,
     theta_edges: NDArray,
     fig: figure,
-    ax: axes,
+    ax_to_plot: axes,
     stat_data: Dict[str, NDArray],
     stat_type: str,
     max_theta: float,
     coord: str,
     fontsize: float,
+    vort_cbar_step: float = 0.5,
 ) -> None:
     """
     Plots a subplot
@@ -184,7 +175,7 @@ def _plot_subplot(
         Boundary values for the bins in theta
     fig: figure
         figure object to be formatted
-    ax: axes
+    ax_to_plot: axes
         axes object to be formatted
     stat_data: Dict[str, NDArray]
         Dictionary of statistics data (mean, median, counts)
@@ -196,6 +187,9 @@ def _plot_subplot(
         Coordinate system used for latitudes
     fontsize: float
         Size of fonts (in general)
+    vort_cbar_step: float = 0.5
+        Round up/ down the max/ min value of vorticity to the nearest vort_cbar_step value
+        e.g. vort_cbar_step = 0.5, then 4.3 will be rounded up to 4.5, and -0.3 to -0.5
 
     Returns
     -------
@@ -203,23 +197,34 @@ def _plot_subplot(
     """
 
     # Initialisation
-    assert stat_type in ("std", "min", "max")
+    assert stat_type in ("mean", "median", "count")
 
-    colour_map_dict = {"std": "jet", "max": "jet", "min": "jet"}
+    ax = copy(ax_to_plot)
+
+    colour_map_dict = {"mean": "RdBu", "median": "RdBu", "count": "jet"}
 
     # Normalise data for the colorbar if needed
-    stat_min = np.nanmin(stat_data[stat_type])
-    stat_max = np.nanmax(stat_data[stat_type])
-    norm = colors.Normalize(vmin=stat_min, vmax=stat_max)
+    if stat_type in ("mean", "median"):
+        all_mean_and_median = np.concatenate(
+            [stat_data[stat].flatten() for stat in ("mean", "median")]
+        )
+        data_min = np.nanmin(all_mean_and_median)
+        data_max = np.nanmax(all_mean_and_median)
 
-    logger.info(
-        f"""
-When plotting for all the data,
-the highest value for {stat_type_full_name[stat_type]} is {stat_max}, while
-the lowest value for {stat_type_full_name[stat_type]} is {stat_min}
-        """
-    )
+        plot_cbar_min = data_min - (data_min % vort_cbar_step)
+        plot_cbar_max = data_max - (data_max % vort_cbar_step) + vort_cbar_step
 
+        # Make colorbar symmetrical about 0
+        abs_biggest = np.max([np.abs(plot_cbar_min), np.abs(plot_cbar_max)])
+
+        norm = colors.Normalize(vmin=-abs_biggest, vmax=abs_biggest)
+    elif stat_type == "count":
+        plot_cbar_min = np.power(10, np.floor(np.log10(np.nanmin(stat_data["count"]))))
+        plot_cbar_max = np.power(10, np.ceil(np.log10(np.nanmax(stat_data["count"]))))
+
+        norm = colors.LogNorm(vmin=plot_cbar_min, vmax=plot_cbar_max)
+    else:
+        raise ValueError(f"Plot_type {stat_type} not recognized")
     #########################
     # Actual plotting
     plot = ax.pcolormesh(
@@ -234,17 +239,16 @@ the lowest value for {stat_type_full_name[stat_type]} is {stat_min}
     return None
 
 
-def plot_sd_max_min(
-    main_params: MainRunParams,
-    map_params: MapParams,
+@ray.remote
+def plot_mean_median_counts(
+    plot_params: PlotParams,
     vort_array: NDArray,
     coord: str = "aacgm",
-    count_cutoff: int = 120,
+    count_cutoff: int = 100,
     fontsize=40,
 ):
     """
-    Plot the standard distribution (s.d.), min and max absolute values at different MLT and latitudes for
-    all data
+    Plot the mean, median and number of data points for all data
 
     In order to make the data plottable on a polar projection,
     - MLT is converted to phi (radians), which is the 'azimuthal angle', aka the angle
@@ -256,10 +260,7 @@ def plot_sd_max_min(
 
     Parameters
     ----------
-
-    main_params: MainRunParams
-        Used here to get location of where the plot should be saved to
-    map_params: MapParams
+    plot_params: PlotParams
         Used here for knowing the bin sizes to use for the plot
     vort_array: List[VortMeasurement]
         List of VortMeasurement objects, each of which contain data for a measurement made
@@ -274,6 +275,9 @@ def plot_sd_max_min(
     -------
 
     """
+
+    logger = logging.getLogger(__name__ + ".plot_mean_median_counts")
+    log_utils.set_logger(logger)
 
     if coord not in ("aacgm", "geo"):
         raise ValueError('Coord must be either "aacgm" or "geo"')
@@ -291,14 +295,12 @@ def plot_sd_max_min(
         [vort_measurement.vorticity_mHz for vort_measurement in vort_array]
     )
 
-    abs_vort_data = np.abs(vort_data)
-
     ####################
     # Creates bin edges
 
     # Bin sizes
-    d_phi_rad = plot_utils.mlt_to_phi(map_params.mlt_bin_size_hr)
-    d_theta_deg = deepcopy(map_params.lat_bin_size_degree)
+    d_phi_rad = plot_utils.mlt_to_phi(plot_params.mlt_bin_size_hr)
+    d_theta_deg = deepcopy(plot_params.lat_bin_size_degree)
 
     # All edges of the bins for PHI
     phi_edges = plot_utils.create_bin_edges((0, 2 * np.pi), d_phi_rad)
@@ -309,8 +311,8 @@ def plot_sd_max_min(
     )
     min_lat_edge = (
         min_lat
-        - (min_lat % map_params.lat_bin_size_degree)
-        + map_params.lat_bin_size_degree
+        - (min_lat % plot_params.lat_bin_size_degree)
+        + plot_params.lat_bin_size_degree
     )
     max_theta = 90 - min_lat_edge
 
@@ -320,34 +322,25 @@ def plot_sd_max_min(
 
     stat_data = dict(
         (
-            stat_type,
+            stat,
             binned_statistic_2d(
                 phi_coords,
                 theta_coords,
                 vort_data,
-                statistic=stat_type,
+                statistic=stat,
                 bins=(phi_edges, theta_edges),
             ).statistic,
         )
-        for stat_type in ("std", "count")
+        for stat in ("mean", "median", "count")
     )
-
-    for stat_type in ("min", "max"):
-        stat_data[stat_type] = binned_statistic_2d(
-            phi_coords,
-            theta_coords,
-            abs_vort_data,
-            statistic=stat_type,
-            bins=(phi_edges, theta_edges),
-        ).statistic
 
     assert not np.isnan(
         stat_data["count"]
     ).any()  # Assert there aren't any invalid values in the counts
 
     # Do not plot bins with fewer counts than a threshold (100 by default)
-    for stat_type in ("std", "max", "min"):
-        stat_data[stat_type][stat_data["count"] < count_cutoff] = np.nan
+    stat_data["mean"][stat_data["count"] < count_cutoff] = np.nan
+    stat_data["median"][stat_data["count"] < count_cutoff] = np.nan
 
     # Do not plot bins that have 0 counts
     stat_data["count"][stat_data["count"] == 0] = np.nan
@@ -357,7 +350,7 @@ def plot_sd_max_min(
     fig, axs = plt.subplots(1, 3, figsize=(36, 21), subplot_kw={"projection": "polar"})
 
     # Plots the data
-    for column_idx, stat_type in enumerate(("std", "max", "min")):
+    for column_idx, stat_type in enumerate(("mean", "median", "count")):
         _plot_subplot(
             phi_edges,
             theta_edges,
@@ -375,10 +368,8 @@ def plot_sd_max_min(
     fig.tight_layout()
 
     # Saving the file
-    plot_dir = main_params.output_dir / "plots"
-    if not plot_dir.exists():
-        plot_dir.mkdir(parents=True)
-
-    plt.savefig(plot_dir / "sd_abs_max_min_(all_data).png", bbox_inches="tight")
+    plt.savefig(
+        common_params.plot_dir / "avg_median_counts_(all_data).png", bbox_inches="tight"
+    )
 
     return None

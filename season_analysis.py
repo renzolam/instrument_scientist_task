@@ -40,7 +40,8 @@ def separate_by_seasons(
 
     Returns
     -------
-    Array of vorticity data separated by season
+    Dict[str, NDArray[VortMeasurement]]
+        Array of vorticity data separated by season
     """
 
     # Initialisation

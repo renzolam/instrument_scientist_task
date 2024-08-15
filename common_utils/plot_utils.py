@@ -17,7 +17,7 @@ List of functions:
 """
 
 import logging
-from typing import Tuple, Union
+from typing import Tuple, Union, List
 import warnings
 
 from matplotlib import axes
@@ -30,7 +30,9 @@ logger = logging.getLogger(__name__)
 log_utils.set_logger(logger)
 
 
-def create_bin_edges(lims: Tuple[float, float], bin_size: float) -> NDArray:
+def create_bin_edges(
+    lims: Union[Tuple[float, float], List[float]], bin_size: float
+) -> NDArray:
     """
     Create an array of the values of the edges of the bins
 

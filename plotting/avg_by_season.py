@@ -4,7 +4,7 @@ Author        : Pak Yin (Renzo) Lam
                 paklam@bas.ac.uk
 
 Date Created  : 2024-08-10
-Last Modified : 2024-08-12
+Last Modified : 2024-08-15
 
 Summary       : Plots statistical analysis (mean, median and number of data points) for vorticity data according
 to their seasons
@@ -19,23 +19,22 @@ List of functions:
 """
 
 import logging
-from typing import List, Dict
+from typing import Dict
 from copy import deepcopy
 
+import ray
 import matplotlib.pyplot as plt
-from matplotlib import colormaps
-from matplotlib import colors
-from matplotlib import axes
-from matplotlib import figure
+from matplotlib import colormaps, colors, axes, figure
 from matplotlib.collections import QuadMesh
 import numpy as np
 from numpy.typing import NDArray
 from scipy.stats import binned_statistic_2d
 
 from common_utils import log_utils, plot_utils
-from classes.map_params_cls import MapParams
+from classes.plot_params_cls import PlotParams
 from classes.main_runparams_cls import MainRunParams
 from classes.data_class import VortMeasurement
+from params import common_params
 
 logger = logging.getLogger(__name__)
 log_utils.set_logger(logger)
@@ -462,9 +461,9 @@ def _plot_1_season(
     return None
 
 
+@ray.remote
 def plot_mean_median_counts(
-    main_params: MainRunParams,
-    map_params: MapParams,
+    plot_params: PlotParams,
     vort_by_season: Dict[str, NDArray[VortMeasurement]],
     coord: str = "aacgm",
     count_cutoff: int = 100,
@@ -483,10 +482,7 @@ def plot_mean_median_counts(
 
     Parameters
     ----------
-
-    main_params: MainRunParams
-        Used here to get location of where the plot should be saved to
-    map_params: MapParams
+    plot_params: PlotParams
         Used here for knowing the bin sizes to use for the plot
     vort_by_season: Dict[str, NDArray[VortMeasurement]]
         Dictionary containing array of VortMeasurement objects, separated by seasons
@@ -503,6 +499,8 @@ def plot_mean_median_counts(
     """
 
     # Initialisation
+    logger = logging.getLogger(__name__ + ".plot_mean_median_counts")
+    log_utils.set_logger(logger)
 
     # Checking
     if coord not in ("aacgm", "geo"):
@@ -513,8 +511,8 @@ def plot_mean_median_counts(
     # Creates bin edges
 
     # Bin sizes
-    d_phi_rad = plot_utils.mlt_to_phi(map_params.mlt_bin_size_hr)
-    d_theta_deg = deepcopy(map_params.lat_bin_size_degree)
+    d_phi_rad = plot_utils.mlt_to_phi(plot_params.mlt_bin_size_hr)
+    d_theta_deg = deepcopy(plot_params.lat_bin_size_degree)
 
     # All edges of the bins for PHI
     phi_edges = plot_utils.create_bin_edges((0, 2 * np.pi), d_phi_rad)
@@ -529,8 +527,8 @@ def plot_mean_median_counts(
     )
     min_lat_edge = (
         min_lat
-        - (min_lat % map_params.lat_bin_size_degree)
-        + map_params.lat_bin_size_degree
+        - (min_lat % plot_params.lat_bin_size_degree)
+        + plot_params.lat_bin_size_degree
     )
     max_theta = 90 - min_lat_edge
 
@@ -577,10 +575,9 @@ def plot_mean_median_counts(
     fig.tight_layout()
 
     # Saving the file
-    plot_dir = main_params.output_dir / "plots"
-    if not plot_dir.exists():
-        plot_dir.mkdir(parents=True)
-
-    plt.savefig(plot_dir / "avg_median_counts_(by_season).png", bbox_inches="tight")
+    plt.savefig(
+        common_params.plot_dir / "avg_median_counts_(by_season).png",
+        bbox_inches="tight",
+    )
 
     return None

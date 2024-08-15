@@ -9,7 +9,8 @@ Last Modified : 2024-08-01
 Summary       : Helps store data in different file formats
 
 List of functions:
-- data_to_json
+- convert_1_txt_to_json
+- all_data_to_json
 """
 
 import logging
@@ -20,6 +21,7 @@ from time import time
 from copy import deepcopy
 
 import numpy as np
+import ray
 
 from common_utils import log_utils
 from params import common_params
@@ -29,6 +31,7 @@ logger = logging.getLogger(__name__)
 log_utils.set_logger(logger)
 
 
+@ray.remote
 def convert_1_txt_to_json(abs_txt_path: Path) -> None:
     """
     For 1 given txt file containing vorticity data, converts it into json files separated by year
@@ -43,6 +46,9 @@ def convert_1_txt_to_json(abs_txt_path: Path) -> None:
     -------
 
     """
+
+    logger = logging.getLogger(__name__ + ".convert_1_txt_to_json.remote")
+    log_utils.set_logger(logger)
 
     # Dictionary containing all the data
     data = {}
@@ -152,7 +158,7 @@ def convert_1_txt_to_json(abs_txt_path: Path) -> None:
                                     """
                             )
 
-                    elif split_line.size == 1:
+                    elif split_line.size == 1:  # If it is a line indicating how many records there are for 1 timestamp
                         pass
                     else:
                         logger.error(
@@ -162,14 +168,13 @@ def convert_1_txt_to_json(abs_txt_path: Path) -> None:
                                 """
                         )
 
-                # TODO: Better sepearte the fail conversion exception
                 except Exception as e:
                     logger.error(
-                        f"""
-                            Line with non-numeric data found, when converting the data txt file into json files:
-                            {line}
-                            {e}
-                            """
+                        f"""It seems like a line with non-numeric data has been found, 
+                        when converting the data txt file into json files:
+                        {line}
+                        {e}
+                        """
                     )
                     pass
 
@@ -192,6 +197,10 @@ def all_data_to_json(main_params: MainRunParams) -> None:
     """
     Converts all txt files in a directory into json files, separated by year
 
+    Parameters
+    ----------
+    main_params: MainRunParams
+        Used here to find all the txt files with the vorticity data.
     Returns
     -------
 
@@ -207,8 +216,13 @@ def all_data_to_json(main_params: MainRunParams) -> None:
     t_start = time()
 
     ####################################
-    for abs_txt_path in list(main_params.abs_data_txt_dir.glob("*.txt")):
-        convert_1_txt_to_json(abs_txt_path)
+    ray.init()
+    refs = [
+        convert_1_txt_to_json.remote(abs_txt_path)
+        for abs_txt_path in list(main_params.abs_data_txt_dir.glob("*.txt"))
+    ]
+    ray.get(refs)
+    ray.shutdown()
 
     logger.info(
         f"Converting data file into json files took {(time() - t_start) / 60:.2f} minute(s)"
