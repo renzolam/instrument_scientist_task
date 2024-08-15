@@ -4,7 +4,7 @@ Author        : Pak Yin (Renzo) Lam
                 paklam@bas.ac.uk
 
 Date Created  : 2024-07-31
-Last Modified : 2024-08-12
+Last Modified : 2024-08-15
 
 Summary       : Main module for the analysis
 """
@@ -12,6 +12,8 @@ Summary       : Main module for the analysis
 import logging
 from time import time
 from sys import getsizeof
+
+import ray
 
 from classes import main_runparams_cls
 from classes.plot_params_cls import PlotParams
@@ -56,19 +58,21 @@ if __name__ == "__main__":
         vort_by_season = season_analysis.separate_by_seasons(all_vort)
 
         ###################################
-        # Produces plots for mean, median and number of data points
-        # avg_all.plot_mean_median_counts(main_params, plot_params, all_vort)
-        #
-        # avg_by_season.plot_mean_median_counts(
-        #     main_params, plot_params, vort_by_season
-        # )
-        #
-        # # Produces plots that show distribution of data
-        # sd_all.plot_sd_max_min(main_params, plot_params, all_vort)
-        # sd_by_season.plot(main_params, plot_params, vort_by_season)
-
-        # Analyses the R1 vorticities
-        r1_avg_vs_mlt.plot(plot_params, vort_by_season)
+        ray.init()
+        refs = [
+            # Produces plots for mean, median and number of data points
+            avg_all.plot_mean_median_counts.remote(main_params, plot_params, all_vort),
+            avg_by_season.plot_mean_median_counts.remote(
+                main_params, plot_params, vort_by_season
+            ),
+            # Produces plots that show distribution of data
+            sd_all.plot_sd_max_min.remote(main_params, plot_params, all_vort),
+            sd_by_season.plot.remote(main_params, plot_params, vort_by_season),
+            # Analyses the R1 vorticity
+            r1_avg_vs_mlt.plot.remote(plot_params, vort_by_season),
+        ]
+        ray.get(refs)
+        ray.shutdown()
 
     except Exception as e:
         logger.exception(e)

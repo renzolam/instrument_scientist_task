@@ -4,7 +4,7 @@ Author        : Pak Yin (Renzo) Lam
                 paklam@bas.ac.uk
 
 Date Created  : 2024-08-10
-Last Modified : 2024-08-14
+Last Modified : 2024-08-15
 
 Summary       : Plots the mean, median and number of data points for all data
 
@@ -19,8 +19,8 @@ import logging
 from copy import deepcopy, copy
 from typing import Dict
 
+import ray
 import matplotlib.pyplot as plt
-
 from matplotlib import colors, figure, axes
 from matplotlib.collections import QuadMesh
 import numpy as np
@@ -240,6 +240,7 @@ def _plot_subplot(
     return None
 
 
+@ray.remote
 def plot_mean_median_counts(
     main_params: MainRunParams,
     plot_params: PlotParams,
@@ -280,6 +281,9 @@ def plot_mean_median_counts(
 
     """
 
+    logger = logging.getLogger(__name__ + ".plot_mean_median_counts")
+    log_utils.set_logger(logger)
+
     if coord not in ("aacgm", "geo"):
         raise ValueError('Coord must be either "aacgm" or "geo"')
     else:
@@ -311,9 +315,9 @@ def plot_mean_median_counts(
         np.array([getattr(vort_data, f"{coord}_lat_c") for vort_data in vort_array])
     )
     min_lat_edge = (
-            min_lat
-            - (min_lat % plot_params.lat_bin_size_degree)
-            + plot_params.lat_bin_size_degree
+        min_lat
+        - (min_lat % plot_params.lat_bin_size_degree)
+        + plot_params.lat_bin_size_degree
     )
     max_theta = 90 - min_lat_edge
 
@@ -369,6 +373,8 @@ def plot_mean_median_counts(
     fig.tight_layout()
 
     # Saving the file
-    plt.savefig(common_params.plot_dir / "avg_median_counts_(all_data).png", bbox_inches="tight")
+    plt.savefig(
+        common_params.plot_dir / "avg_median_counts_(all_data).png", bbox_inches="tight"
+    )
 
     return None

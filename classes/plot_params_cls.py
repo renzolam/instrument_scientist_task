@@ -15,12 +15,12 @@ List of classes:
 import logging
 import json
 from pathlib import Path
-from datetime import datetime, timedelta, timezone
 from types import SimpleNamespace
 from typing import List
-from copy import deepcopy
 
-from common_utils import log_utils
+import numpy as np
+
+from common_utils import log_utils, plot_utils
 
 
 logger = logging.getLogger(__name__)
@@ -35,7 +35,7 @@ class PlotParams:
     lat_bin_size_degree: float = 1
     mlt_bin_size_hr: float = 1
 
-    r1_avg_vort_vs_mlt_aacgm_lat_lim: List[float] = [72, 77]
+    r1_vort_aacgm_lat_lim: List[float] = [72, 77]
 
     def __init__(self):
 
@@ -87,3 +87,23 @@ class PlotParams:
             )
         else:
             pass
+
+        # Check if latitude range for R1 vorticity is 'valid'. If not, set to nearest value(s)
+        lat_edges = plot_utils.create_bin_edges((65, 90), self.lat_bin_size_degree)
+        for lim_idx, lat_lim in enumerate(self.r1_vort_aacgm_lat_lim):
+
+            if lat_lim not in lat_edges:
+
+                # Adjust it to the nearest value found in lat_edges (aka, values of the edges of the latitude bins)
+                nearest_num_idx = (np.abs(lat_edges - lat_lim)).argmin()
+                self.r1_vort_aacgm_lat_lim[lim_idx] = lat_edges[nearest_num_idx]
+
+                logger.warning(
+                    f"""'r1_vort_aacgm_lat_lim' in plot_params.json must be a value of the edges of the bins, i.e. in
+                    {lat_edges}
+                    Hence, {lat_lim} degrees has been changed to the nearest latitude bin edge 
+                    {lat_edges[nearest_num_idx]} degrees
+                    """
+                )
+            else:
+                pass

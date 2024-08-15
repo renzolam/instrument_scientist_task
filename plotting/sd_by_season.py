@@ -4,7 +4,7 @@ Author        : Pak Yin (Renzo) Lam
                 paklam@bas.ac.uk
 
 Date Created  : 2024-08-14
-Last Modified : 2024-08-14
+Last Modified : 2024-08-15
 
 Summary       : Plots the standard distribution (s.d.), min and max absolute values at different MLT and latitudes
 according to their seasons
@@ -23,6 +23,7 @@ from typing import List, Dict
 from copy import deepcopy
 
 import matplotlib.pyplot as plt
+import ray
 from matplotlib import colormaps, colors, axes, figure
 from matplotlib.collections import QuadMesh
 import numpy as np
@@ -478,6 +479,7 @@ def _plot_1_season(
     return None
 
 
+@ray.remote
 def plot(
     main_params: MainRunParams,
     plot_params: PlotParams,
@@ -520,6 +522,9 @@ def plot(
 
     # Initialisation
 
+    logger = logging.getLogger(__name__ + ".plot")
+    log_utils.set_logger(logger)
+
     # Checking
     if coord not in ("aacgm", "geo"):
         raise ValueError('Coord must be either "aacgm" or "geo"')
@@ -544,9 +549,9 @@ def plot(
         np.array([getattr(vort_data, f"{coord}_lat_c") for vort_data in all_vort])
     )
     min_lat_edge = (
-            min_lat
-            - (min_lat % plot_params.lat_bin_size_degree)
-            + plot_params.lat_bin_size_degree
+        min_lat
+        - (min_lat % plot_params.lat_bin_size_degree)
+        + plot_params.lat_bin_size_degree
     )
     max_theta = 90 - min_lat_edge
 
@@ -593,6 +598,8 @@ def plot(
     fig.tight_layout()
 
     # Saving the file
-    plt.savefig(common_params.plot_dir / "sd_abs_max_min_(by_season).png", bbox_inches="tight")
+    plt.savefig(
+        common_params.plot_dir / "sd_abs_max_min_(by_season).png", bbox_inches="tight"
+    )
 
     return None

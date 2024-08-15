@@ -4,7 +4,7 @@ Author        : Pak Yin (Renzo) Lam
                 paklam@bas.ac.uk
 
 Date Created  : 2024-08-12
-Last Modified : 2024-08-14
+Last Modified : 2024-08-15
 
 Summary       : Plots the standard distribution (s.d.), min and max absolute values at different MLT and latitudes for
 all data
@@ -22,6 +22,7 @@ from typing import Dict
 
 import matplotlib.pyplot as plt
 
+import ray
 from matplotlib import colors, figure, axes
 from matplotlib.collections import QuadMesh
 import numpy as np
@@ -233,6 +234,7 @@ the lowest value for {stat_type_full_name[stat_type]} is {stat_min}
     return None
 
 
+@ray.remote
 def plot_sd_max_min(
     main_params: MainRunParams,
     plot_params: PlotParams,
@@ -274,6 +276,9 @@ def plot_sd_max_min(
 
     """
 
+    logger = logging.getLogger(__name__ + ".plot_sd_max_min")
+    log_utils.set_logger(logger)
+
     if coord not in ("aacgm", "geo"):
         raise ValueError('Coord must be either "aacgm" or "geo"')
     else:
@@ -307,9 +312,9 @@ def plot_sd_max_min(
         np.array([getattr(vort_data, f"{coord}_lat_c") for vort_data in vort_array])
     )
     min_lat_edge = (
-            min_lat
-            - (min_lat % plot_params.lat_bin_size_degree)
-            + plot_params.lat_bin_size_degree
+        min_lat
+        - (min_lat % plot_params.lat_bin_size_degree)
+        + plot_params.lat_bin_size_degree
     )
     max_theta = 90 - min_lat_edge
 
@@ -378,6 +383,8 @@ def plot_sd_max_min(
     if not plot_dir.exists():
         plot_dir.mkdir(parents=True)
 
-    plt.savefig(common_params.plot_dir / "sd_abs_max_min_(all_data).png", bbox_inches="tight")
+    plt.savefig(
+        common_params.plot_dir / "sd_abs_max_min_(all_data).png", bbox_inches="tight"
+    )
 
     return None

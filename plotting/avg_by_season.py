@@ -4,7 +4,7 @@ Author        : Pak Yin (Renzo) Lam
                 paklam@bas.ac.uk
 
 Date Created  : 2024-08-10
-Last Modified : 2024-08-14
+Last Modified : 2024-08-15
 
 Summary       : Plots statistical analysis (mean, median and number of data points) for vorticity data according
 to their seasons
@@ -22,6 +22,7 @@ import logging
 from typing import List, Dict
 from copy import deepcopy
 
+import ray
 import matplotlib.pyplot as plt
 from matplotlib import colormaps, colors, axes, figure
 from matplotlib.collections import QuadMesh
@@ -241,7 +242,7 @@ def _find_min_max_for_colorbar(
                     vort_season,
                     statistic=stat_type,
                     bins=(phi_edges, theta_edges),
-                ).statistic
+                ).statistic,
             )
             for stat_type in ("mean", "median", "count")
         )
@@ -460,6 +461,7 @@ def _plot_1_season(
     return None
 
 
+@ray.remote
 def plot_mean_median_counts(
     main_params: MainRunParams,
     plot_params: PlotParams,
@@ -501,6 +503,8 @@ def plot_mean_median_counts(
     """
 
     # Initialisation
+    logger = logging.getLogger(__name__ + ".plot_mean_median_counts")
+    log_utils.set_logger(logger)
 
     # Checking
     if coord not in ("aacgm", "geo"):
@@ -526,9 +530,9 @@ def plot_mean_median_counts(
         np.array([getattr(vort_data, f"{coord}_lat_c") for vort_data in all_vort])
     )
     min_lat_edge = (
-            min_lat
-            - (min_lat % plot_params.lat_bin_size_degree)
-            + plot_params.lat_bin_size_degree
+        min_lat
+        - (min_lat % plot_params.lat_bin_size_degree)
+        + plot_params.lat_bin_size_degree
     )
     max_theta = 90 - min_lat_edge
 
@@ -575,6 +579,9 @@ def plot_mean_median_counts(
     fig.tight_layout()
 
     # Saving the file
-    plt.savefig(common_params.plot_dir / "avg_median_counts_(by_season).png", bbox_inches="tight")
+    plt.savefig(
+        common_params.plot_dir / "avg_median_counts_(by_season).png",
+        bbox_inches="tight",
+    )
 
     return None
