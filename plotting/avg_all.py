@@ -29,7 +29,6 @@ from scipy.stats import binned_statistic_2d
 
 from common_utils import log_utils, plot_utils
 from classes.plot_params_cls import PlotParams
-from classes.main_runparams_cls import MainRunParams
 from classes.data_class import VortMeasurement
 from params import common_params
 
@@ -242,7 +241,6 @@ def _plot_subplot(
 
 @ray.remote
 def plot_mean_median_counts(
-    main_params: MainRunParams,
     plot_params: PlotParams,
     vort_array: NDArray,
     coord: str = "aacgm",
@@ -262,9 +260,6 @@ def plot_mean_median_counts(
 
     Parameters
     ----------
-
-    main_params: MainRunParams
-        Used here to get location of where the plot should be saved to
     plot_params: PlotParams
         Used here for knowing the bin sizes to use for the plot
     vort_array: List[VortMeasurement]

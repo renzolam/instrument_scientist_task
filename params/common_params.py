@@ -11,7 +11,6 @@ Summary       : Contains parameters that are to be shared across scripts
 
 from datetime import datetime, timezone
 
-from common_utils import log_utils
 from classes.main_runparams_cls import MainRunParams
 
 # Set up the name of log file

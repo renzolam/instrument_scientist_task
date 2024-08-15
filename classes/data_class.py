@@ -13,7 +13,7 @@ List of classes:
 """
 
 import logging
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 
 import numpy as np
 
@@ -24,13 +24,16 @@ log_utils.set_logger(logger)
 
 
 class VortMeasurement:
+    """
+    Class for holding a vorticity datapoint at a specified time and location
+    """
 
     r1_b1: float
     r1_b2: float
     r2_b1: float
     r2_b2: float
     area: float
-    vorticity_mHz: float
+    vorticity_mHz: float  # in the 'correct' sign convention, as recommended by the original txt data file
     MLT: float
     geo_lat_c: float
     geo_long_c: float

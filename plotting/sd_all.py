@@ -236,7 +236,6 @@ the lowest value for {stat_type_full_name[stat_type]} is {stat_min}
 
 @ray.remote
 def plot_sd_max_min(
-    main_params: MainRunParams,
     plot_params: PlotParams,
     vort_array: NDArray,
     coord: str = "aacgm",
@@ -257,9 +256,6 @@ def plot_sd_max_min(
 
     Parameters
     ----------
-
-    main_params: MainRunParams
-        Used here to get location of where the plot should be saved to
     plot_params: PlotParams
         Used here for knowing the bin sizes to use for the plot
     vort_array: List[VortMeasurement]
@@ -377,11 +373,6 @@ def plot_sd_max_min(
     # Does more formatting
     _fig_formatting(fig, vort_array, fontsize)
     fig.tight_layout()
-
-    # Saving the file
-    plot_dir = main_params.output_dir / "plots"
-    if not plot_dir.exists():
-        plot_dir.mkdir(parents=True)
 
     plt.savefig(
         common_params.plot_dir / "sd_abs_max_min_(all_data).png", bbox_inches="tight"

@@ -9,7 +9,8 @@ Last Modified : 2024-08-01
 Summary       : Helps store data in different file formats
 
 List of functions:
-- data_to_json
+- convert_1_txt_to_json
+- all_data_to_json
 """
 
 import logging
@@ -157,7 +158,7 @@ def convert_1_txt_to_json(abs_txt_path: Path) -> None:
                                     """
                             )
 
-                    elif split_line.size == 1:
+                    elif split_line.size == 1:  # If it is a line indicating how many records there are for 1 timestamp
                         pass
                     else:
                         logger.error(
@@ -167,14 +168,13 @@ def convert_1_txt_to_json(abs_txt_path: Path) -> None:
                                 """
                         )
 
-                # TODO: Better sepearte the fail conversion exception
                 except Exception as e:
                     logger.error(
-                        f"""
-                            Line with non-numeric data found, when converting the data txt file into json files:
-                            {line}
-                            {e}
-                            """
+                        f"""It seems like a line with non-numeric data has been found, 
+                        when converting the data txt file into json files:
+                        {line}
+                        {e}
+                        """
                     )
                     pass
 
@@ -197,6 +197,10 @@ def all_data_to_json(main_params: MainRunParams) -> None:
     """
     Converts all txt files in a directory into json files, separated by year
 
+    Parameters
+    ----------
+    main_params: MainRunParams
+        Used here to find all the txt files with the vorticity data.
     Returns
     -------
 

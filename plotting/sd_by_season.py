@@ -19,7 +19,7 @@ List of functions:
 """
 
 import logging
-from typing import List, Dict
+from typing import Dict
 from copy import deepcopy
 
 import matplotlib.pyplot as plt
@@ -481,7 +481,6 @@ def _plot_1_season(
 
 @ray.remote
 def plot(
-    main_params: MainRunParams,
     plot_params: PlotParams,
     vort_by_season: Dict[str, NDArray[VortMeasurement]],
     coord: str = "aacgm",
@@ -502,8 +501,6 @@ def plot(
     Parameters
     ----------
 
-    main_params: MainRunParams
-        Used here to get location of where the plot should be saved to
     plot_params: PlotParams
         Used here for knowing the bin sizes to use for the plot
     vort_by_season: Dict[str, NDArray[VortMeasurement]]

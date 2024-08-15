@@ -40,6 +40,7 @@ if __name__ == "__main__":
 
         # Convert original txt data file into json files, if explicitly told to do so,
         # or there aren't any json files in the directory
+        # This allows data to be read in parallel later on
         if (
             main_params.txt_files_to_json
             or len(list(common_params.json_out_dir.glob("*vorticity.json"))) == 0
@@ -55,21 +56,30 @@ if __name__ == "__main__":
             f"Memory occupied by all vorticity data is {getsizeof(all_vort) / 1e6:.2f} MB"
         )
 
-        vort_by_season = season_analysis.separate_by_seasons(all_vort)
+        vort_by_season = season_analysis.separate_by_seasons(all_vort)  # Data separated by seasons
 
         ###################################
+        # Plots in parallel
         ray.init()
         refs = [
             # Produces plots for mean, median and number of data points
-            avg_all.plot_mean_median_counts.remote(main_params, plot_params, all_vort),
+            avg_all.plot_mean_median_counts.remote(
+                plot_params, all_vort
+            ),
             avg_by_season.plot_mean_median_counts.remote(
-                main_params, plot_params, vort_by_season
+                plot_params, vort_by_season
             ),
             # Produces plots that show distribution of data
-            sd_all.plot_sd_max_min.remote(main_params, plot_params, all_vort),
-            sd_by_season.plot.remote(main_params, plot_params, vort_by_season),
+            sd_all.plot_sd_max_min.remote(
+                plot_params, all_vort
+            ),
+            sd_by_season.plot.remote(
+                plot_params, vort_by_season
+            ),
             # Analyses the R1 vorticity
-            r1_avg_vs_mlt.plot.remote(plot_params, vort_by_season),
+            r1_avg_vs_mlt.plot.remote(
+                plot_params, vort_by_season
+            ),
         ]
         ray.get(refs)
         ray.shutdown()

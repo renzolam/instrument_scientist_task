@@ -50,7 +50,7 @@ def get_avg_vs_mlt(
     Returns
     -------
     NDArray
-    Average vorticity for each MLT
+        Average vorticity for each MLT
     """
 
     # Initialisation
