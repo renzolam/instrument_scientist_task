@@ -4,7 +4,7 @@ Author        : Pak Yin (Renzo) Lam
                 paklam@bas.ac.uk
 
 Date Created  : 2024-08-12
-Last Modified : 2024-08-15
+Last Modified : 2024-08-16
 
 Summary       : Provide functions that are necessary during plotting
 
@@ -154,6 +154,7 @@ def _common_formatting(ax: axes, fontsize: float, max_theta: float) -> None:
             ["00\nMLT", "", "06\nMLT", "", "12\nMLT", "", "18\nMLT", ""],
             fontsize=fontsize,
         )
+        ax.xaxis.set_tick_params(pad=50)
 
     # Ticks in latitude
     r_ticks = np.arange(0, max_theta_for_plot + 5, 5)
@@ -162,7 +163,7 @@ def _common_formatting(ax: axes, fontsize: float, max_theta: float) -> None:
 
     # Set grid lines
     ax.grid(
-        visible=True, which="both", axis="both", linestyle=":", alpha=1, color="black"
+        visible=True, which="both", axis="both", linestyle="-", alpha=1, color="#9F9F9F", linewidth=5.5
     )
 
     return None

@@ -370,7 +370,7 @@ def plot_sd_max_min(
 
     ####################
     # Setting up the plotting routine
-    fig, axs = plt.subplots(1, 3, figsize=(36, 21), subplot_kw={"projection": "polar"})
+    fig, axs = plt.subplots(1, 3, figsize=(36, 38), subplot_kw={"projection": "polar"})
 
     # Plots the data
     for column_idx, stat_type in enumerate(("std", "max", "min")):
