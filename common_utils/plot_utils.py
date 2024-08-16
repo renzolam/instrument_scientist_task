@@ -4,7 +4,7 @@ Author        : Pak Yin (Renzo) Lam
                 paklam@bas.ac.uk
 
 Date Created  : 2024-08-12
-Last Modified : 2024-08-12
+Last Modified : 2024-08-15
 
 Summary       : Provide functions that are necessary during plotting
 
@@ -21,6 +21,7 @@ from typing import Tuple, Union, List
 import warnings
 
 from matplotlib import axes
+from matplotlib.colors import LinearSegmentedColormap
 import numpy as np
 from numpy.typing import NDArray
 
@@ -165,3 +166,25 @@ def _common_formatting(ax: axes, fontsize: float, max_theta: float) -> None:
     )
 
     return None
+
+
+def divergent_cmap():
+    """
+    Provide a divergent colormap that is readable
+
+    Returns
+    -------
+
+    """
+
+    # Colours at the left end, centre, and right end
+    colour_min = '#fdbc7e'
+    colour_centre = '#000000'
+    colour_max = '#baffff'
+
+    cmap = LinearSegmentedColormap.from_list(
+        'custom_cmap',
+        [colour_min, colour_centre, colour_max],
+    )
+
+    return cmap

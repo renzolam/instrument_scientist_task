@@ -160,8 +160,9 @@ def formatting(
         f"""
         Average Vorticity vs MLT
         Within {lat_min}\N{DEGREE SIGN} - {lat_max}\N{DEGREE SIGN} AACGM Latitude
-        in the Norther Hemisphere
-        During the duration {min_year} - {max_year}
+        (R1 Vorticity)
+        in the Northern Hemisphere
+        During {min_year} - {max_year}
         """,
         fontsize=fontsize,
         horizontalalignment="center",

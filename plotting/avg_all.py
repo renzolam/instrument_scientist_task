@@ -4,7 +4,7 @@ Author        : Pak Yin (Renzo) Lam
                 paklam@bas.ac.uk
 
 Date Created  : 2024-08-10
-Last Modified : 2024-08-15
+Last Modified : 2024-08-16
 
 Summary       : Plots the mean, median and number of data points for all data
 
@@ -77,9 +77,9 @@ def _ax_formatting(
         "count": "Number of Data Points",
     }
 
-    ticks_dict = {
-        "mean": np.arange(-3.5, 3.5, 1),
-        "median": np.arange(-3.5, 3.5, 1),
+    major_ticks_dict = {
+        "mean": np.arange(-4, 4, 1, dtype=float),
+        "median": np.arange(-3.5, 3.5, 0.5, dtype=float),
         "count": np.power(10, range(0, 10)),
     }
 
@@ -93,9 +93,26 @@ def _ax_formatting(
         orientation="horizontal",
         location="top",
         aspect=15,
-        ticks=ticks_dict[plot_type],
+        ticks=major_ticks_dict[plot_type],
     )
-    cbar.ax.tick_params(labelsize=fontsize, length=fontsize / 2, width=fontsize / 6)
+
+    # Set minor ticks
+    cbar.ax.minorticks_on()
+
+    # Format the colorbar
+    cbar.ax.tick_params(
+        labelsize=fontsize,
+        length=fontsize / 1.25,
+        width=fontsize / 6,
+        which="major"
+    )
+    cbar.ax.tick_params(
+        labelsize=fontsize,
+        length=fontsize / 2.5,
+        width=fontsize / 10,
+        which="minor"
+    )
+
     cbar.ax.set_title(label_dict[plot_type], fontsize=fontsize, pad=fontsize)
 
     # Label for radial axis
@@ -139,9 +156,9 @@ def _fig_formatting(
     fig.suptitle(
         f"""
         Mean, Median, and Number of Data Points 
-        for Vorticity Measurements
-        of the Northern Hemisphere
-        In the Period {min_year} - {max_year}
+        of Vorticity Measurements
+        in the Northern Hemisphere
+        During {min_year} - {max_year}
         """,
         fontsize=fontsize,
         horizontalalignment="center",
@@ -161,8 +178,7 @@ def _plot_subplot(
     stat_type: str,
     max_theta: float,
     coord: str,
-    fontsize: float,
-    vort_cbar_step: float = 0.5,
+    fontsize: float
 ) -> None:
     """
     Plots a subplot
@@ -187,9 +203,6 @@ def _plot_subplot(
         Coordinate system used for latitudes
     fontsize: float
         Size of fonts (in general)
-    vort_cbar_step: float = 0.5
-        Round up/ down the max/ min value of vorticity to the nearest vort_cbar_step value
-        e.g. vort_cbar_step = 0.5, then 4.3 will be rounded up to 4.5, and -0.3 to -0.5
 
     Returns
     -------
@@ -205,17 +218,11 @@ def _plot_subplot(
 
     # Normalise data for the colorbar if needed
     if stat_type in ("mean", "median"):
-        all_mean_and_median = np.concatenate(
-            [stat_data[stat].flatten() for stat in ("mean", "median")]
-        )
-        data_min = np.nanmin(all_mean_and_median)
-        data_max = np.nanmax(all_mean_and_median)
-
-        plot_cbar_min = data_min - (data_min % vort_cbar_step)
-        plot_cbar_max = data_max - (data_max % vort_cbar_step) + vort_cbar_step
+        data_min = np.nanmin(stat_data[stat_type])
+        data_max = np.nanmax(stat_data[stat_type])
 
         # Make colorbar symmetrical about 0
-        abs_biggest = np.max([np.abs(plot_cbar_min), np.abs(plot_cbar_max)])
+        abs_biggest = np.max([np.abs(data_min), np.abs(data_max)])
 
         norm = colors.Normalize(vmin=-abs_biggest, vmax=abs_biggest)
     elif stat_type == "count":

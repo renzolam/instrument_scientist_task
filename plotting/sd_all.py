@@ -4,7 +4,7 @@ Author        : Pak Yin (Renzo) Lam
                 paklam@bas.ac.uk
 
 Date Created  : 2024-08-12
-Last Modified : 2024-08-15
+Last Modified : 2024-08-16
 
 Summary       : Plots the standard distribution (s.d.), min and max absolute values at different MLT and latitudes for
 all data
@@ -17,7 +17,7 @@ List of functions:
 """
 
 import logging
-from copy import deepcopy, copy
+from copy import deepcopy
 from typing import Dict
 
 import matplotlib.pyplot as plt
@@ -31,7 +31,6 @@ from scipy.stats import binned_statistic_2d
 
 from common_utils import log_utils, plot_utils
 from classes.plot_params_cls import PlotParams
-from classes.main_runparams_cls import MainRunParams
 from classes.data_class import VortMeasurement
 from params import common_params
 
@@ -87,8 +86,8 @@ def _ax_formatting(
     }
 
     ticks_dict = {
-        "std": np.arange(-80.5, 80.5, 1),
-        "max": np.arange(0, 90, 10),
+        "std": np.arange(-80, 80, 1),
+        "max": np.arange(0, 90, 20),
         "min": np.arange(0, 0.1, 0.01),
     }
 
@@ -104,7 +103,24 @@ def _ax_formatting(
         aspect=15,
         ticks=ticks_dict[stat_type],
     )
-    cbar.ax.tick_params(labelsize=fontsize, length=fontsize / 2, width=fontsize / 6)
+
+    # Set minor ticks
+    cbar.ax.minorticks_on()
+
+    # Format the colorbar
+    cbar.ax.tick_params(
+        labelsize=fontsize,
+        length=fontsize / 1.25,
+        width=fontsize / 6,
+        which="major"
+    )
+    cbar.ax.tick_params(
+        labelsize=fontsize,
+        length=fontsize / 2.5,
+        width=fontsize / 10,
+        which="minor"
+    )
+
     cbar.ax.set_title(label_dict[stat_type], fontsize=fontsize, pad=fontsize)
 
     # Label for radial axis
@@ -151,7 +167,7 @@ def _fig_formatting(
         Min and Max Absolute Values 
         of Vorticity Measurements
         in the Northern Hemisphere
-        During the Period {min_year} - {max_year}
+        During {min_year} - {max_year}
         """,
         fontsize=fontsize,
         horizontalalignment="center",

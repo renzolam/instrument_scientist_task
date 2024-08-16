@@ -4,7 +4,7 @@ Author        : Pak Yin (Renzo) Lam
                 paklam@bas.ac.uk
 
 Date Created  : 2024-08-10
-Last Modified : 2024-08-15
+Last Modified : 2024-08-16
 
 Summary       : Plots statistical analysis (mean, median and number of data points) for vorticity data according
 to their seasons
@@ -82,8 +82,8 @@ def _ax_formatting(
     }
 
     ticks_dict = {
-        0: np.arange(-3.5, 3.5, 1),
-        1: np.arange(-3.5, 3.5, 1),
+        0: np.arange(-4, 4, 1, dtype=float),
+        1: np.arange(-4, 4, 1, dtype=float),
         2: np.power(10, range(0, 10)),
     }
 
@@ -108,7 +108,24 @@ def _ax_formatting(
             aspect=15,
             ticks=ticks_dict[column_idx],
         )
-        cbar.ax.tick_params(labelsize=fontsize, length=fontsize / 2, width=fontsize / 6)
+
+        # Set minor ticks
+        cbar.ax.minorticks_on()
+
+        # Format the colorbar
+        cbar.ax.tick_params(
+            labelsize=fontsize,
+            length=fontsize / 1.25,
+            width=fontsize / 6,
+            which="major"
+        )
+        cbar.ax.tick_params(
+            labelsize=fontsize,
+            length=fontsize / 2.5,
+            width=fontsize / 10,
+            which="minor"
+        )
+
         cbar.ax.set_title(
             label_dict[column_idx], fontsize=fontsize, fontweight="bold", pad=fontsize
         )
@@ -167,10 +184,10 @@ def _fig_formatting(
     fig.suptitle(
         f"""
         Mean, Median, and Number of Data Points 
-        for Vorticity Measurements
-        of the Northern Hemisphere
+        of Vorticity Measurements
+        in the Northern Hemisphere
         (Separated by Season)
-        In the Period {min_year} - {max_year}
+        During {min_year} - {max_year}
         """,
         fontsize=fontsize * 1.5,
         horizontalalignment="center",
@@ -187,7 +204,6 @@ def _find_min_max_for_colorbar(
     vort_by_season: Dict[str, NDArray[VortMeasurement]],
     coord: str,
     count_cutoff: float,
-    vort_cbar_step: float = 0.5,
 ) -> Dict[str, Dict[str, float]]:
     """
     Determines the minimum and maximum limits for the colorbars
@@ -204,9 +220,6 @@ def _find_min_max_for_colorbar(
         Coordinate system for latitudes
     count_cutoff: float
         Count threshold for bins. If below this threshold, vorticity will not be plotted for this bin
-    vort_cbar_step: float
-        Round up/ down the max/ min value of vorticity to the nearest vort_cbar_step value
-        e.g. vort_cbar_step = 0.5, then 4.3 will be rounded up to 4.5, and -0.3 to -0.5
 
     Returns
     -------
@@ -279,18 +292,12 @@ def _find_min_max_for_colorbar(
             "max": np.power(10, np.ceil(np.log10(overall_min_max["count"]["max"]))),
         },
         "mean": {
-            "min": overall_min_max["mean"]["min"]
-            - (overall_min_max["mean"]["min"] % vort_cbar_step),
+            "min": overall_min_max["mean"]["min"],
             "max": overall_min_max["mean"]["max"]
-            - (overall_min_max["mean"]["max"] % vort_cbar_step)
-            + vort_cbar_step,
         },
         "median": {
-            "min": overall_min_max["median"]["min"]
-            - (overall_min_max["median"]["min"] % vort_cbar_step),
+            "min": overall_min_max["median"]["min"],
             "max": overall_min_max["median"]["max"]
-            - (overall_min_max["median"]["max"] % vort_cbar_step)
-            + vort_cbar_step,
         },
     }
 

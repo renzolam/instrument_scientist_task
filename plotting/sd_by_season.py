@@ -4,7 +4,7 @@ Author        : Pak Yin (Renzo) Lam
                 paklam@bas.ac.uk
 
 Date Created  : 2024-08-14
-Last Modified : 2024-08-15
+Last Modified : 2024-08-16
 
 Summary       : Plots the standard distribution (s.d.), min and max absolute values at different MLT and latitudes
 according to their seasons
@@ -82,8 +82,8 @@ def _ax_formatting(
     }
 
     ticks_dict = {
-        0: np.arange(1, 15, 1),
-        1: np.arange(0, 90, 10),
+        0: np.arange(0, 100, 2),
+        1: np.arange(0, 100, 20),
         2: np.arange(0, 0.3, 0.02),
     }
 
@@ -108,7 +108,23 @@ def _ax_formatting(
             aspect=25,
             ticks=ticks_dict[column_idx],
         )
-        cbar.ax.tick_params(labelsize=fontsize, length=fontsize / 2, width=fontsize / 6)
+
+        # Set minor ticks
+        cbar.ax.minorticks_on()
+
+        # Format the colorbar
+        cbar.ax.tick_params(
+            labelsize=fontsize,
+            length=fontsize / 1.25,
+            width=fontsize / 6,
+            which="major"
+        )
+        cbar.ax.tick_params(
+            labelsize=fontsize,
+            length=fontsize / 2.5,
+            width=fontsize / 10,
+            which="minor"
+        )
         cbar.ax.set_title(
             label_dict[column_idx], fontsize=fontsize, fontweight="bold", pad=fontsize
         )
@@ -171,7 +187,7 @@ def _fig_formatting(
         of Vorticity Measurements
         in the Northern Hemisphere
         (Separated by Seasons)
-        During the Period {min_year} - {max_year}
+        During {min_year} - {max_year}
         """,
         fontsize=fontsize * 1.5,
         horizontalalignment="center",
