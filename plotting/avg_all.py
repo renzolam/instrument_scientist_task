@@ -37,12 +37,12 @@ log_utils.set_logger(logger)
 
 
 def _ax_formatting(
-    fig: figure,
-    ax: axes,
-    plot_to_format: QuadMesh,
-    plot_type: str,
-    coord: str,
-    fontsize: float,
+        fig: figure,
+        ax: axes,
+        plot_to_format: QuadMesh,
+        plot_type: str,
+        coord: str,
+        fontsize: float,
 ) -> None:
     """
     Formatting which applies to sub-plots specifically
@@ -124,7 +124,7 @@ def _ax_formatting(
 
 
 def _fig_formatting(
-    fig: figure, all_vort: NDArray[VortMeasurement], fontsize: float
+        fig: figure, all_vort: NDArray[VortMeasurement], fontsize: float
 ) -> None:
     """
     Does formatting that is not specific to any subplot
@@ -164,15 +164,15 @@ def _fig_formatting(
 
 
 def _plot_subplot(
-    phi_edges: NDArray,
-    theta_edges: NDArray,
-    fig: figure,
-    ax_to_plot: axes,
-    stat_data: Dict[str, NDArray],
-    stat_type: str,
-    max_theta: float,
-    coord: str,
-    fontsize: float,
+        phi_edges: NDArray,
+        theta_edges: NDArray,
+        fig: figure,
+        ax_to_plot: axes,
+        stat_data: Dict[str, NDArray],
+        stat_type: str,
+        max_theta: float,
+        coord: str,
+        fontsize: float,
 ) -> None:
     """
     Plots a subplot
@@ -215,6 +215,14 @@ def _plot_subplot(
         data_min = np.nanmin(stat_data[stat_type])
         data_max = np.nanmax(stat_data[stat_type])
 
+        logger.info(
+            f"""
+When plotting for the entire dataset,
+the highest value for {stat_type} is {data_max:.2f} mHz,
+the lowest value for {stat_type} is {data_min:.2f} mHz
+"""
+        )
+
         # Make colorbar symmetrical about 0
         abs_biggest = np.max([np.abs(data_min), np.abs(data_max)])
 
@@ -222,6 +230,14 @@ def _plot_subplot(
     elif stat_type == "count":
         plot_cbar_min = np.power(10, np.floor(np.log10(np.nanmin(stat_data["count"]))))
         plot_cbar_max = np.power(10, np.ceil(np.log10(np.nanmax(stat_data["count"]))))
+
+        logger.info(
+            f"""
+When plotting for the entire dataset,
+the highest value for counts is {np.nanmax(stat_data["count"]):.2f}, 
+the lowest value for counts is {np.nanmin(stat_data["count"]):.2f}
+"""
+        )
 
         norm = colors.LogNorm(vmin=plot_cbar_min, vmax=plot_cbar_max)
     else:
@@ -242,10 +258,10 @@ def _plot_subplot(
 
 @ray.remote
 def plot_mean_median_counts(
-    plot_params: PlotParams,
-    vort_array: NDArray,
-    coord: str = "aacgm",
-    fontsize=40,
+        plot_params: PlotParams,
+        vort_array: NDArray,
+        coord: str = "aacgm",
+        fontsize=40,
 ):
     """
     Plot the mean, median and number of data points for all data
@@ -309,9 +325,9 @@ def plot_mean_median_counts(
         np.array([getattr(vort_data, f"{coord}_lat_c") for vort_data in vort_array])
     )
     min_lat_edge = (
-        min_lat
-        - (min_lat % plot_params.lat_bin_size_degree)
-        + plot_params.lat_bin_size_degree
+            min_lat
+            - (min_lat % plot_params.lat_bin_size_degree)
+            + plot_params.lat_bin_size_degree
     )
     max_theta = 90 - min_lat_edge
 
