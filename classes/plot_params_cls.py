@@ -4,7 +4,7 @@ Author        : Pak Yin (Renzo) Lam
                 paklam@bas.ac.uk
 
 Date Created  : 2024-08-07
-Last Modified : 2024-08-07
+Last Modified : 2024-08-17
 
 Summary       : Class for holding data of the parameters for producing the maps of mean and median values
 
@@ -34,6 +34,8 @@ class PlotParams:
 
     lat_bin_size_degree: float = 1
     mlt_bin_size_hr: float = 1
+
+    count_cutoff: int = 120  # Bins with fewer data points than this cutoff will not be plotted
 
     r1_vort_aacgm_lat_lim: List[float] = [72, 77]
 

@@ -4,14 +4,14 @@ Author        : Pak Yin (Renzo) Lam
                 paklam@bas.ac.uk
 
 Date Created  : 2024-08-14
-Last Modified : 2024-08-15
+Last Modified : 2024-08-17
 
 Summary       : Analyses the R1 current by plotting the average vorticity (across a specified range of AACGM latitudes)
 across all MLT
 """
 
 import logging
-from typing import Dict, List
+from typing import Dict
 from copy import deepcopy
 
 import ray
@@ -33,7 +33,6 @@ log_utils.set_logger(logger)
 def get_avg_vs_mlt(
     season_vorts: NDArray[VortMeasurement],
     plot_params: PlotParams,
-    count_cuttoff: int = 100,
 ) -> NDArray:
     """
     For a given season, this calculates the average vorticity for each MLT
@@ -43,9 +42,8 @@ def get_avg_vs_mlt(
     season_vorts: NDArray[VortMeasurement]
         Array of VortMeasurement objects
     plot_params: PlotParams
-        Used here to decide which data falls within the latitude range set in plot_params
-    count_cuttoff: int
-        Threshold for number of data points. If below this threshold, data from that bin will be thrown away
+        Used here to decide which data falls within the latitude range set in plot_params, and for the count cutoff.
+        Bins with fewer data points than this cutoff will not be plotted
 
     Returns
     -------
@@ -101,7 +99,7 @@ def get_avg_vs_mlt(
 
     # Throw away the bins with 0 counts
     for stat_type in ("sum", "count"):
-        two_d_stats[stat_type][two_d_stats["count"] <= count_cuttoff] = np.nan
+        two_d_stats[stat_type][two_d_stats["count"] <= plot_params.count_cutoff] = np.nan
 
     vort_sum = np.nansum(
         two_d_stats["sum"], axis=1

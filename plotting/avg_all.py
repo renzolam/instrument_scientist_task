@@ -4,7 +4,7 @@ Author        : Pak Yin (Renzo) Lam
                 paklam@bas.ac.uk
 
 Date Created  : 2024-08-10
-Last Modified : 2024-08-16
+Last Modified : 2024-08-17
 
 Summary       : Plots the mean, median and number of data points for all data
 
@@ -251,7 +251,6 @@ def plot_mean_median_counts(
     plot_params: PlotParams,
     vort_array: NDArray,
     coord: str = "aacgm",
-    count_cutoff: int = 100,
     fontsize=40,
 ):
     """
@@ -268,13 +267,12 @@ def plot_mean_median_counts(
     Parameters
     ----------
     plot_params: PlotParams
-        Used here for knowing the bin sizes to use for the plot
+        Used here for knowing the bin sizes to use for the plot, and to know the count cutoff. Bins with fewer data
+        points than this cutoff will not be plotted
     vort_array: List[VortMeasurement]
         List of VortMeasurement objects, each of which contain data for a measurement made
     coord: str
         Coordinate system to be used for the latitude. Only accepts AACGM or GEO
-    count_cutoff: int
-        Bins with fewer data points than this cutoff will not be plotted
     fontsize: float
         Size of most words which appear on the plot
 
@@ -346,8 +344,8 @@ def plot_mean_median_counts(
     ).any()  # Assert there aren't any invalid values in the counts
 
     # Do not plot bins with fewer counts than a threshold (100 by default)
-    stat_data["mean"][stat_data["count"] < count_cutoff] = np.nan
-    stat_data["median"][stat_data["count"] < count_cutoff] = np.nan
+    stat_data["mean"][stat_data["count"] < plot_params.count_cutoff] = np.nan
+    stat_data["median"][stat_data["count"] < plot_params.count_cutoff] = np.nan
 
     # Do not plot bins that have 0 counts
     stat_data["count"][stat_data["count"] == 0] = np.nan

@@ -4,7 +4,7 @@ Author        : Pak Yin (Renzo) Lam
                 paklam@bas.ac.uk
 
 Date Created  : 2024-08-14
-Last Modified : 2024-08-16
+Last Modified : 2024-08-17
 
 Summary       : Plots the standard distribution (s.d.), min and max absolute values at different MLT and latitudes
 according to their seasons
@@ -32,7 +32,6 @@ from scipy.stats import binned_statistic_2d
 
 from common_utils import log_utils, plot_utils
 from classes.plot_params_cls import PlotParams
-from classes.main_runparams_cls import MainRunParams
 from classes.data_class import VortMeasurement
 from params import common_params
 
@@ -203,8 +202,7 @@ def _find_min_max_for_colorbar(
     theta_edges: NDArray,
     vort_by_season: Dict[str, NDArray[VortMeasurement]],
     coord: str,
-    count_cutoff: float,
-    vort_cbar_step: float = 0.5,
+    plot_params: PlotParams,
 ) -> Dict[str, Dict[str, float]]:
     """
     Determines the minimum and maximum limits for the colorbars
@@ -219,11 +217,8 @@ def _find_min_max_for_colorbar(
         Dictionary of Vorticity Measurements, by season
     coord: str
         Coordinate system for latitudes
-    count_cutoff: float
-        Count threshold for bins. If below this threshold, vorticity will not be plotted for this bin
-    vort_cbar_step: float
-        Round up/ down the max/ min value of vorticity to the nearest vort_cbar_step value
-        e.g. vort_cbar_step = 0.5, then 4.3 will be rounded up to 4.5, and -0.3 to -0.5
+    plot_params: PlotParams
+        Used here to get the count cutoff. Bins with fewer data points than this cutoff will not be plotted
 
     Returns
     -------
@@ -278,7 +273,7 @@ def _find_min_max_for_colorbar(
 
         # Filtering out unwanted data
         for stat_type in ("std", "max", "min"):
-            seasonal_data[stat_type][seasonal_data["count"] < count_cutoff] = np.nan
+            seasonal_data[stat_type][seasonal_data["count"] < plot_params.count_cutoff] = np.nan
         seasonal_data["count"][seasonal_data["count"] == 0] = np.nan
 
         for stat_type in ("std", "max", "min"):
@@ -409,13 +404,45 @@ def _plot_1_season(
     phi_edges: NDArray,
     theta_edges: NDArray,
     data_1_season: NDArray[VortMeasurement],
-    count_cutoff: int,
     cbar_min_max: Dict[str, Dict[str, float]],
     row_idx: int,
     max_theta: float,
     fontsize: float,
     coord: str,
+    plot_params: PlotParams,
 ) -> None:
+    """
+    Plots all the stats for 1 season
+
+    Parameters
+    ----------
+    fig: figure
+        fig object to be formatted
+    axs: NDArray[NDArray[axes]]
+        Array of axes objects to be formatted
+    phi_edges: NDArray
+        Edge values of the bins for phi
+    theta_edges: NDArray
+        Edge values of the bins for theta
+    data_1_season: NDArray[VortMeasurement]
+        Array of vorticity data for this season
+    cbar_min_max: Dict[str, Dict[str, float]]
+        Dictionary for the minimum and maximum values of the colorbars
+    row_idx: int
+        which row we are in (indicating the season) (takes into account of the row for the colorbars)
+    max_theta: float
+        Max value of theta
+    fontsize: float
+        Size of the font (in general)
+    coord: str
+        Which coordinate system to use for latitudes
+    plot_params: PlotParams
+        Used here to get the count cutoff. Bins with fewer data points than this cutoff will not be plotted
+
+    Returns
+    -------
+
+    """
 
     # Extracts data
     phi_coords = plot_utils.mlt_to_phi(
@@ -470,7 +497,7 @@ def _plot_1_season(
 
     # Do not plot bins with fewer counts than a threshold
     for stat_type in ("std", "max", "min"):
-        stat_data_season[stat_type][stat_data_season["count"] < count_cutoff] = np.nan
+        stat_data_season[stat_type][stat_data_season["count"] < plot_params.count_cutoff] = np.nan
 
     # Do not plot bins that have 0 counts
     stat_data_season["count"][stat_data_season["count"] == 0] = np.nan
@@ -500,7 +527,6 @@ def plot(
     plot_params: PlotParams,
     vort_by_season: Dict[str, NDArray[VortMeasurement]],
     coord: str = "aacgm",
-    count_cutoff: int = 120,
     fontsize=40,
 ):
     """
@@ -523,8 +549,6 @@ def plot(
         Dictionary containing array of VortMeasurement objects, separated by seasons
     coord: str
         Coordinate system to be used for the latitude. Only accepts AACGM or GEO
-    count_cutoff: int
-        Bins with fewer data points than this cutoff will not be plotted
     fontsize: float
         Size of most words which appear on the plot
 
@@ -576,7 +600,7 @@ def plot(
         theta_edges,
         vort_by_season,
         coord,
-        count_cutoff,
+        plot_params,
     )
     ####################
     # Setting up the plotting routine
@@ -598,12 +622,12 @@ def plot(
             phi_edges,
             theta_edges,
             vort_1_season,
-            count_cutoff,
             cbar_min_max,
             row_idx,
             max_theta,
             fontsize,
             coord,
+            plot_params,
         )
 
     # Does more formatting

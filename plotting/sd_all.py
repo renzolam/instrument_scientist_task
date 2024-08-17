@@ -4,7 +4,7 @@ Author        : Pak Yin (Renzo) Lam
                 paklam@bas.ac.uk
 
 Date Created  : 2024-08-12
-Last Modified : 2024-08-16
+Last Modified : 2024-08-17
 
 Summary       : Plots the standard distribution (s.d.), min and max absolute values at different MLT and latitudes for
 all data
@@ -255,7 +255,6 @@ def plot_sd_max_min(
     plot_params: PlotParams,
     vort_array: NDArray,
     coord: str = "aacgm",
-    count_cutoff: int = 120,
     fontsize=40,
 ):
     """
@@ -273,13 +272,12 @@ def plot_sd_max_min(
     Parameters
     ----------
     plot_params: PlotParams
-        Used here for knowing the bin sizes to use for the plot
+        Used here for knowing the bin sizes to use for the plot, and for the count cutoff. Bins with fewer data points
+        than this cutoff will not be plotted
     vort_array: List[VortMeasurement]
         List of VortMeasurement objects, each of which contain data for a measurement made
     coord: str
         Coordinate system to be used for the latitude. Only accepts AACGM or GEO
-    count_cutoff: int
-        Bins with fewer data points than this cutoff will not be plotted
     fontsize: float
         Size of most words which appear on the plot
 
@@ -363,7 +361,7 @@ def plot_sd_max_min(
 
     # Do not plot bins with fewer counts than a threshold (100 by default)
     for stat_type in ("std", "max", "min"):
-        stat_data[stat_type][stat_data["count"] < count_cutoff] = np.nan
+        stat_data[stat_type][stat_data["count"] < plot_params.count_cutoff] = np.nan
 
     # Do not plot bins that have 0 counts
     stat_data["count"][stat_data["count"] == 0] = np.nan
