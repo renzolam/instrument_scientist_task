@@ -22,7 +22,9 @@ class MainRunParams:
     Class containing all info for the run
     """
 
-    abs_data_txt_dir: Path  # The absolute path of the directory holding the downloaded data file(s)
+    abs_data_txt_dir: (
+        Path  # The absolute path of the directory holding the downloaded data file(s)
+    )
     output_dir: Path  # Where all the generated files go
 
     # Whether to use the json files which have been converted from the original txt file

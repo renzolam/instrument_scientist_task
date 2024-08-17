@@ -16,6 +16,7 @@ import ray
 from matplotlib import pyplot as plt
 from matplotlib import figure, axes
 import numpy as np
+from matplotlib.ticker import AutoMinorLocator
 from numpy.typing import NDArray
 
 from common_utils import log_utils
@@ -28,10 +29,7 @@ log_utils.set_logger(logger)
 
 
 def formatting(
-    all_vort: NDArray[VortMeasurement],
-    fig: figure,
-    ax: axes,
-    fontsize: float
+    all_vort: NDArray[VortMeasurement], fig: figure, ax: axes, fontsize: float
 ) -> None:
     """
     Does all the formatting needed
@@ -52,11 +50,11 @@ def formatting(
 
     """
 
+    # Set title
     all_t = np.array([vort.utc_time for vort in all_vort])
     min_year = np.nanmin(all_t).year
     max_year = np.nanmax(all_t).year
 
-    # Set title
     fig.suptitle(
         f"""
         Histogram for Area of Loops Used
@@ -89,8 +87,10 @@ def formatting(
     )
 
     # Ticks
-    tick_length = {"major": 40, "minor": 15}
-    show_num = {"major": True, "minor": True}
+    tick_length = {"major": 50, "minor": 20}
+    show_num = {"major": True, "minor": False}
+
+    ax.xaxis.set_minor_locator(AutoMinorLocator())
 
     for tick_type in ("major", "minor"):
         ax.xaxis.set_tick_params(
@@ -103,7 +103,7 @@ def formatting(
             top=False,
             labelbottom=show_num[tick_type],
             labeltop=False,
-            pad=fontsize,
+            pad=fontsize * 0.8,
         )
 
         ax.yaxis.set_tick_params(
@@ -116,7 +116,7 @@ def formatting(
             right=True,
             labelleft=show_num[tick_type],
             labelright=False,
-            pad=fontsize,
+            pad=fontsize * 0.8,
         )
 
     # Set scale of axes
@@ -160,15 +160,11 @@ def plot(
     area_km2_data = np.array([vort.area_km2 for vort in all_vort])
 
     ######################
-    # Plotting
+    # Plots the histogram
 
     fig, ax = plt.subplots(figsize=(30, 17))
 
-    ax.hist(
-        area_km2_data,
-        bins=plot_params.histogram_no_of_bins,
-        rwidth=0.9
-    )
+    ax.hist(area_km2_data, bins=plot_params.histogram_no_of_bins, rwidth=0.9)
 
     formatting(all_vort, fig, ax, fontsize)
 

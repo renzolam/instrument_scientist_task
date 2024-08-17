@@ -158,7 +158,9 @@ def convert_1_txt_to_json(abs_txt_path: Path) -> None:
                                     """
                             )
 
-                    elif split_line.size == 1:  # If it is a line indicating how many records there are for 1 timestamp
+                    elif (
+                        split_line.size == 1
+                    ):  # If it is a line indicating how many records there are for 1 timestamp
                         pass
                     else:
                         logger.error(

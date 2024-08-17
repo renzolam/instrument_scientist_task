@@ -116,13 +116,13 @@ def _ax_formatting(
             labelsize=fontsize,
             length=fontsize / 1.25,
             width=fontsize / 6,
-            which="major"
+            which="major",
         )
         cbar.ax.tick_params(
             labelsize=fontsize,
             length=fontsize / 2.5,
             width=fontsize / 10,
-            which="minor"
+            which="minor",
         )
         cbar.ax.set_title(
             label_dict[column_idx], fontsize=fontsize, fontweight="bold", pad=fontsize
@@ -273,7 +273,9 @@ def _find_min_max_for_colorbar(
 
         # Filtering out unwanted data
         for stat_type in ("std", "max", "min"):
-            seasonal_data[stat_type][seasonal_data["count"] < plot_params.count_cutoff] = np.nan
+            seasonal_data[stat_type][
+                seasonal_data["count"] < plot_params.count_cutoff
+            ] = np.nan
         seasonal_data["count"][seasonal_data["count"] == 0] = np.nan
 
         for stat_type in ("std", "max", "min"):
@@ -497,7 +499,9 @@ def _plot_1_season(
 
     # Do not plot bins with fewer counts than a threshold
     for stat_type in ("std", "max", "min"):
-        stat_data_season[stat_type][stat_data_season["count"] < plot_params.count_cutoff] = np.nan
+        stat_data_season[stat_type][
+            stat_data_season["count"] < plot_params.count_cutoff
+        ] = np.nan
 
     # Do not plot bins that have 0 counts
     stat_data_season["count"][stat_data_season["count"] == 0] = np.nan

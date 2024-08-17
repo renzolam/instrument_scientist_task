@@ -66,7 +66,7 @@ def gen_vort_obj_by_year(file_abs_path: Path) -> Union[NDArray[VortMeasurement],
         return vort_yearly
 
     except Exception as e:
-        logger.exception(f'{e}\nExiting programme')
+        logger.exception(f"{e}\nExiting programme")
         sys.exit()
 
 

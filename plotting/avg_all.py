@@ -101,16 +101,10 @@ def _ax_formatting(
 
     # Format the colorbar
     cbar.ax.tick_params(
-        labelsize=fontsize,
-        length=fontsize / 1.25,
-        width=fontsize / 6,
-        which="major"
+        labelsize=fontsize, length=fontsize / 1.25, width=fontsize / 6, which="major"
     )
     cbar.ax.tick_params(
-        labelsize=fontsize,
-        length=fontsize / 2.5,
-        width=fontsize / 10,
-        which="minor"
+        labelsize=fontsize, length=fontsize / 2.5, width=fontsize / 10, which="minor"
     )
 
     cbar.ax.set_title(label_dict[plot_type], fontsize=fontsize, pad=fontsize)
@@ -178,7 +172,7 @@ def _plot_subplot(
     stat_type: str,
     max_theta: float,
     coord: str,
-    fontsize: float
+    fontsize: float,
 ) -> None:
     """
     Plots a subplot

@@ -3,5 +3,5 @@
   "mlt_bin_size_hr": 1,
   "count_cutoff": 120,
   "r1_vort_aacgm_lat_lim": [72, 77],
-  "histogram_no_of_bins": 30
+  "histogram_no_of_bins": 29
 }

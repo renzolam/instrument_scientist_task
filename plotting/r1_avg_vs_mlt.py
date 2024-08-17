@@ -99,7 +99,9 @@ def get_avg_vs_mlt(
 
     # Throw away the bins with 0 counts
     for stat_type in ("sum", "count"):
-        two_d_stats[stat_type][two_d_stats["count"] <= plot_params.count_cutoff] = np.nan
+        two_d_stats[stat_type][
+            two_d_stats["count"] <= plot_params.count_cutoff
+        ] = np.nan
 
     vort_sum = np.nansum(
         two_d_stats["sum"], axis=1
