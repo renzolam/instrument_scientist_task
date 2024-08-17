@@ -31,7 +31,7 @@ def set_logger(logger_2_set: logging.Logger) -> None:
     logger_2_set.setLevel(logging.INFO)
 
     formatter = logging.Formatter(
-        "\n%(asctime)s - \n%(name)s line %(lineno)s - %(levelname)s: \n%(message)s"
+        "\n%(asctime)s - %(name)s line %(lineno)s - %(levelname)s: \n\n\t%(message)s"
     )
 
     # Create a file handler to write logs to a file

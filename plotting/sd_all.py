@@ -223,11 +223,9 @@ def _plot_subplot(
     norm = colors.Normalize(vmin=stat_min, vmax=stat_max)
 
     logger.info(
-        f"""
-When plotting for the entire dataset,
-the highest value for {stat_type_full_name[stat_type]} is {stat_max:.2f} mHz,
-the lowest value for {stat_type_full_name[stat_type]} is {stat_min:.2f} mHz
-        """
+        f"""When plotting for the entire dataset,
+    the highest value for {stat_type_full_name[stat_type]} is {stat_max:.2f} mHz,
+    the lowest value for {stat_type_full_name[stat_type]} is {stat_min:.2f} mHz"""
     )
 
     #########################

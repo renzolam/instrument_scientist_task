@@ -216,11 +216,9 @@ def _plot_subplot(
         data_max = np.nanmax(stat_data[stat_type])
 
         logger.info(
-            f"""
-When plotting for the entire dataset,
-the highest value for {stat_type} is {data_max:.2f} mHz,
-the lowest value for {stat_type} is {data_min:.2f} mHz
-"""
+            f"""When plotting for the entire dataset,
+    the highest value for {stat_type} is {data_max:.2f} mHz,
+    the lowest value for {stat_type} is {data_min:.2f} mHz"""
         )
 
         # Make colorbar symmetrical about 0
@@ -232,11 +230,9 @@ the lowest value for {stat_type} is {data_min:.2f} mHz
         plot_cbar_max = np.power(10, np.ceil(np.log10(np.nanmax(stat_data["count"]))))
 
         logger.info(
-            f"""
-When plotting for the entire dataset,
-the highest value for counts is {np.nanmax(stat_data["count"]):.2f}, 
-the lowest value for counts is {np.nanmin(stat_data["count"]):.2f}
-"""
+            f"""When plotting for the entire dataset,
+    the highest value for counts is {np.nanmax(stat_data["count"]):.2f}, 
+    the lowest value for counts is {np.nanmin(stat_data["count"]):.2f}"""
         )
 
         norm = colors.LogNorm(vmin=plot_cbar_min, vmax=plot_cbar_max)

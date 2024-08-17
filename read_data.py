@@ -95,6 +95,6 @@ def json_to_array() -> NDArray:
     )
     ray.shutdown()
 
-    logger.info(f"Reading in all json files took {time() - t_read_start} seconds")
+    logger.info(f"Reading in all json files took {time() - t_read_start:.2f} seconds")
 
     return np.concatenate(all_vort)
