@@ -270,7 +270,7 @@ def plot_mean_median_counts(
         Used here for knowing the bin sizes to use for the plot, and to know the count cutoff. Bins with fewer data
         points than this cutoff will not be plotted
     vort_array: List[VortMeasurement]
-        List of VortMeasurement objects, each of which contain data for a measurement made
+        Array of VortMeasurement objects, each of which contain data for a measurement made
     coord: str
         Coordinate system to be used for the latitude. Only accepts AACGM or GEO
     fontsize: float

@@ -21,7 +21,7 @@ from common_utils import log_utils
 from params import common_params
 import read_data
 import file_conversion
-from plotting import avg_all, avg_by_season, sd_all, sd_by_season, r1_avg_vs_mlt
+from plotting import avg_all, avg_by_season, sd_all, sd_by_season, r1_avg_vs_mlt, area_histogram
 import season_analysis
 
 if __name__ == "__main__":
@@ -62,24 +62,26 @@ if __name__ == "__main__":
         # Plots in parallel
         ray.init()
         refs = [
-            # Produces plots for mean, median and number of data points
-            avg_all.plot_mean_median_counts.remote(
-                plot_params, all_vort
-            ),
-            avg_by_season.plot_mean_median_counts.remote(
-                plot_params, vort_by_season
-            ),
-            # Produces plots that show distribution of data
-            sd_all.plot_sd_max_min.remote(
-                plot_params, all_vort
-            ),
-            sd_by_season.plot.remote(
-                plot_params, vort_by_season
-            ),
-            # Analyses the R1 vorticity
-            r1_avg_vs_mlt.plot.remote(
-                plot_params, vort_by_season
-            ),
+            # # Produces plots for mean, median and number of data points
+            # avg_all.plot_mean_median_counts.remote(
+            #     plot_params, all_vort
+            # ),
+            # avg_by_season.plot_mean_median_counts.remote(
+            #     plot_params, vort_by_season
+            # ),
+            # # Produces plots that show distribution of data
+            # sd_all.plot_sd_max_min.remote(
+            #     plot_params, all_vort
+            # ),
+            # sd_by_season.plot.remote(
+            #     plot_params, vort_by_season
+            # ),
+            # # Analyses the R1 vorticity
+            # r1_avg_vs_mlt.plot.remote(
+            #     plot_params, vort_by_season
+            # ),
+
+            area_histogram.plot.remote(plot_params, all_vort),
         ]
         ray.get(refs)
         ray.shutdown()

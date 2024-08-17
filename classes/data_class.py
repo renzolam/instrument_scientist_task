@@ -32,7 +32,7 @@ class VortMeasurement:
     r1_b2: float
     r2_b1: float
     r2_b2: float
-    area: float
+    area_km2: float
     vorticity_mHz: float  # in the 'correct' sign convention, as recommended by the original txt data file
     MLT: float
     geo_lat_c: float

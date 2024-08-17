@@ -60,7 +60,7 @@ def convert_1_txt_to_json(abs_txt_path: Path) -> None:
         "r1_b2",
         "r2_b1",
         "r2_b2",
-        "area",
+        "area_km2",
         "vorticity_mHz",
         "MLT",
     ]

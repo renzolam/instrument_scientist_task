@@ -39,6 +39,8 @@ class PlotParams:
 
     r1_vort_aacgm_lat_lim: List[float] = [72, 77]
 
+    histogram_no_of_bins: int = 30
+
     def __init__(self):
 
         # Setting values
