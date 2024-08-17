@@ -109,16 +109,10 @@ def _ax_formatting(
 
     # Format the colorbar
     cbar.ax.tick_params(
-        labelsize=fontsize,
-        length=fontsize / 1.25,
-        width=fontsize / 6,
-        which="major"
+        labelsize=fontsize, length=fontsize / 1.25, width=fontsize / 6, which="major"
     )
     cbar.ax.tick_params(
-        labelsize=fontsize,
-        length=fontsize / 2.5,
-        width=fontsize / 10,
-        which="minor"
+        labelsize=fontsize, length=fontsize / 2.5, width=fontsize / 10, which="minor"
     )
 
     cbar.ax.set_title(label_dict[stat_type], fontsize=fontsize, pad=fontsize)

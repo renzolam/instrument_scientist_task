@@ -35,9 +35,13 @@ class PlotParams:
     lat_bin_size_degree: float = 1
     mlt_bin_size_hr: float = 1
 
-    count_cutoff: int = 120  # Bins with fewer data points than this cutoff will not be plotted
+    count_cutoff: int = (
+        120  # Bins with fewer data points than this cutoff will not be plotted
+    )
 
     r1_vort_aacgm_lat_lim: List[float] = [72, 77]
+
+    histogram_no_of_bins: int = 29
 
     def __init__(self):
 

@@ -101,16 +101,10 @@ def _ax_formatting(
 
     # Format the colorbar
     cbar.ax.tick_params(
-        labelsize=fontsize,
-        length=fontsize / 1.25,
-        width=fontsize / 6,
-        which="major"
+        labelsize=fontsize, length=fontsize / 1.25, width=fontsize / 6, which="major"
     )
     cbar.ax.tick_params(
-        labelsize=fontsize,
-        length=fontsize / 2.5,
-        width=fontsize / 10,
-        which="minor"
+        labelsize=fontsize, length=fontsize / 2.5, width=fontsize / 10, which="minor"
     )
 
     cbar.ax.set_title(label_dict[plot_type], fontsize=fontsize, pad=fontsize)
@@ -178,7 +172,7 @@ def _plot_subplot(
     stat_type: str,
     max_theta: float,
     coord: str,
-    fontsize: float
+    fontsize: float,
 ) -> None:
     """
     Plots a subplot
@@ -270,7 +264,7 @@ def plot_mean_median_counts(
         Used here for knowing the bin sizes to use for the plot, and to know the count cutoff. Bins with fewer data
         points than this cutoff will not be plotted
     vort_array: List[VortMeasurement]
-        List of VortMeasurement objects, each of which contain data for a measurement made
+        Array of VortMeasurement objects, each of which contain data for a measurement made
     coord: str
         Coordinate system to be used for the latitude. Only accepts AACGM or GEO
     fontsize: float

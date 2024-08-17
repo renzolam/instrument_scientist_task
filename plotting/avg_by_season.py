@@ -116,13 +116,13 @@ def _ax_formatting(
             labelsize=fontsize,
             length=fontsize / 1.25,
             width=fontsize / 6,
-            which="major"
+            which="major",
         )
         cbar.ax.tick_params(
             labelsize=fontsize,
             length=fontsize / 2.5,
             width=fontsize / 10,
-            which="minor"
+            which="minor",
         )
 
         cbar.ax.set_title(
@@ -202,7 +202,7 @@ def _find_min_max_for_colorbar(
     theta_edges: NDArray,
     vort_by_season: Dict[str, NDArray[VortMeasurement]],
     coord: str,
-    plot_params: PlotParams
+    plot_params: PlotParams,
 ) -> Dict[str, Dict[str, float]]:
     """
     Determines the minimum and maximum limits for the colorbars
@@ -261,8 +261,12 @@ def _find_min_max_for_colorbar(
 
         # Filtering out unwanted data
         seasonal_data["count"][seasonal_data["count"] == 0] = np.nan
-        seasonal_data["mean"][seasonal_data["count"] < plot_params.count_cutoff] = np.nan
-        seasonal_data["median"][seasonal_data["count"] < plot_params.count_cutoff] = np.nan
+        seasonal_data["mean"][
+            seasonal_data["count"] < plot_params.count_cutoff
+        ] = np.nan
+        seasonal_data["median"][
+            seasonal_data["count"] < plot_params.count_cutoff
+        ] = np.nan
 
         for stat_type in ("mean", "median", "count"):
             seasonal_min_max_dict[stat_type]["min"].append(
@@ -292,11 +296,11 @@ def _find_min_max_for_colorbar(
         },
         "mean": {
             "min": overall_min_max["mean"]["min"],
-            "max": overall_min_max["mean"]["max"]
+            "max": overall_min_max["mean"]["max"],
         },
         "median": {
             "min": overall_min_max["median"]["min"],
-            "max": overall_min_max["median"]["max"]
+            "max": overall_min_max["median"]["max"],
         },
     }
 
@@ -473,8 +477,12 @@ def _plot_1_season(
     ).any()  # Assert there aren't any invalid values in the counts
 
     # Do not plot bins with fewer counts than a threshold (100 by default)
-    stat_data_season["mean"][stat_data_season["count"] < plot_params.count_cutoff] = np.nan
-    stat_data_season["median"][stat_data_season["count"] < plot_params.count_cutoff] = np.nan
+    stat_data_season["mean"][
+        stat_data_season["count"] < plot_params.count_cutoff
+    ] = np.nan
+    stat_data_season["median"][
+        stat_data_season["count"] < plot_params.count_cutoff
+    ] = np.nan
 
     # Do not plot bins that have 0 counts
     stat_data_season["count"][stat_data_season["count"] == 0] = np.nan

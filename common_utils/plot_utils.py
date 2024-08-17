@@ -163,7 +163,13 @@ def _common_formatting(ax: axes, fontsize: float, max_theta: float) -> None:
 
     # Set grid lines
     ax.grid(
-        visible=True, which="both", axis="both", linestyle="-", alpha=1, color="#9F9F9F", linewidth=5.5
+        visible=True,
+        which="both",
+        axis="both",
+        linestyle="-",
+        alpha=1,
+        color="#9F9F9F",
+        linewidth=5.5,
     )
 
     return None
@@ -179,12 +185,12 @@ def divergent_cmap():
     """
 
     # Colours at the left end, centre, and right end
-    colour_min = '#fdbc7e'
-    colour_centre = '#000000'
-    colour_max = '#baffff'
+    colour_min = "#fdbc7e"
+    colour_centre = "#000000"
+    colour_max = "#baffff"
 
     cmap = LinearSegmentedColormap.from_list(
-        'custom_cmap',
+        "custom_cmap",
         [colour_min, colour_centre, colour_max],
     )
 
