@@ -17,7 +17,7 @@ from classes.main_runparams_cls import MainRunParams
 log_dir = MainRunParams().output_dir / "logs"
 if not log_dir.exists():
     log_dir.mkdir(parents=True)
-log_abs_path = log_dir / f"SWIS_task_{datetime.now(timezone.utc):%Y%m%d_%H%M}_UT.log"
+log_abs_path = log_dir / f"SWIS_task.log"
 
 # Sets up dir where data in json forms are found
 json_out_dir = MainRunParams().output_dir / "vorticity_json"
