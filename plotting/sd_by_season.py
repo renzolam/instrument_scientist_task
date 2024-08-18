@@ -38,6 +38,14 @@ from params import common_params
 logger = logging.getLogger(__name__)
 log_utils.set_logger(logger)
 
+season_names = {1: "Spring", 2: "Summer", 3: "Autumn", 4: "Winter"}
+
+stat_type_full_name = {
+    "std": "standard deviation",
+    "min": "min magnitude",
+    "max": "max magnitude",
+}
+
 
 def _ax_formatting(
     fig: figure,
@@ -85,8 +93,6 @@ def _ax_formatting(
         1: np.arange(0, 100, 20),
         2: np.arange(0, 0.3, 0.02),
     }
-
-    season_names = {1: "Spring", 2: "Summer", 3: "Autumn", 4: "Winter"}
 
     ax: axes = axs[row_idx][column_idx]
 
@@ -298,38 +304,6 @@ def _find_min_max_for_colorbar(
         for stat_type in ("std", "max", "min")
     )
 
-    # Determine the limits for the colorbar based on the min and max values present across all seasons
-    # cbar_min_max_output = {
-    #     "std": {
-    #         "min": np.power(10, np.floor(np.log10(overall_min_max["count"]["min"]))),
-    #         "max": np.power(10, np.ceil(np.log10(overall_min_max["count"]["max"]))),
-    #     },
-    #     "max": {
-    #         "min": overall_min_max["mean"]["min"]
-    #         - (overall_min_max["mean"]["min"] % vort_cbar_step),
-    #         "max": overall_min_max["mean"]["max"]
-    #         - (overall_min_max["mean"]["max"] % vort_cbar_step)
-    #         + vort_cbar_step,
-    #     },
-    #     "min": {
-    #         "min": overall_min_max["median"]["min"]
-    #         - (overall_min_max["median"]["min"] % vort_cbar_step),
-    #         "max": overall_min_max["median"]["max"]
-    #         - (overall_min_max["median"]["max"] % vort_cbar_step)
-    #         + vort_cbar_step,
-    #     },
-    # }
-    #
-    # # Make the colorbar symmetric about 0 for means and medians. Assumes max val > 0
-    # for stat_type in ("mean", "median"):
-    #     min_for_stat = cbar_min_max_output[stat_type]["min"]
-    #     max_for_stat = cbar_min_max_output[stat_type]["max"]
-    #
-    #     biggest_abs_val = np.max([np.abs(min_for_stat), np.abs(max_for_stat)])
-    #
-    #     cbar_min_max_output[stat_type]["min"] = -biggest_abs_val
-    #     cbar_min_max_output[stat_type]["max"] = biggest_abs_val
-
     return overall_min_max
 
 
@@ -521,6 +495,12 @@ def _plot_1_season(
             row_idx,
             max_theta,
             fontsize,
+        )
+
+        logger.info(
+            f"""When plotting for {season_names[row_idx]},
+    the highest value for {stat_type_full_name[stat_type]} is {np.nanmax(stat_data_season[stat_type]):.2f} mHz,
+    the lowest value for {stat_type_full_name[stat_type]} is {np.nanmin(stat_data_season[stat_type]):.2f} mHz"""
         )
 
     return None

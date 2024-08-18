@@ -38,6 +38,8 @@ from params import common_params
 logger = logging.getLogger(__name__)
 log_utils.set_logger(logger)
 
+season_names = {1: "Spring", 2: "Summer", 3: "Autumn", 4: "Winter"}
+
 
 def _ax_formatting(
     fig: figure,
@@ -85,8 +87,6 @@ def _ax_formatting(
         1: np.arange(-4, 4, 1, dtype=float),
         2: np.power(10, range(0, 10)),
     }
-
-    season_names = {1: "Spring", 2: "Summer", 3: "Autumn", 4: "Winter"}
 
     ax: axes = axs[row_idx][column_idx]
 
@@ -503,6 +503,14 @@ def _plot_1_season(
             max_theta,
             fontsize,
         )
+
+        # Logs interesting stat
+        units_dict = {"mean": "mHz", "median": "mHz", "count": ""}
+        logger.info(
+            f"""When plotting for {season_names[row_idx]},
+    the highest value for {stat_type} is {np.nanmax(stat_data_season[stat_type]):.2f} {units_dict[stat_type]},
+    the lowest value for {stat_type} is {np.nanmin(stat_data_season[stat_type]):.2f} {units_dict[stat_type]}"""
+                    )
 
     return None
 
