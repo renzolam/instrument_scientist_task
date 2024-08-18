@@ -4,7 +4,7 @@ Author        : Pak Yin (Renzo) Lam
                 paklam@bas.ac.uk
 
 Date Created  : 2024-08-12
-Last Modified : 2024-08-17
+Last Modified : 2024-08-18
 
 Summary       : Plots the standard distribution (s.d.), min and max absolute values at different MLT and latitudes for
 all data
@@ -286,6 +286,13 @@ def plot_sd_max_min(
     else:
         pass
 
+    # Filtering out data that covers areas larger than the cutoff size
+    area_data = np.array(
+        [vort_measurement.area_km2 for vort_measurement in vort_array]
+    )
+
+    vort_array = vort_array[area_data <= plot_params.area_km2_cuttoff]
+
     # Extracts data
     phi_coords = plot_utils.mlt_to_phi(
         np.array([vort_data.MLT for vort_data in vort_array])
@@ -296,7 +303,6 @@ def plot_sd_max_min(
     vort_data = np.array(
         [vort_measurement.vorticity_mHz for vort_measurement in vort_array]
     )
-
     abs_vort_data = np.abs(vort_data)
 
     ####################

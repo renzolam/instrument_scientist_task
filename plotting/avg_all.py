@@ -4,7 +4,7 @@ Author        : Pak Yin (Renzo) Lam
                 paklam@bas.ac.uk
 
 Date Created  : 2024-08-10
-Last Modified : 2024-08-17
+Last Modified : 2024-08-18
 
 Summary       : Plots the mean, median and number of data points for all data
 
@@ -79,7 +79,7 @@ def _ax_formatting(
 
     major_ticks_dict = {
         "mean": np.arange(-4, 4, 1, dtype=float),
-        "median": np.arange(-3.5, 3.5, 0.5, dtype=float),
+        "median": np.arange(-4, 4, 0.2, dtype=float),
         "count": np.power(10, range(0, 10)),
     }
 
@@ -294,6 +294,13 @@ def plot_mean_median_counts(
         raise ValueError('Coord must be either "aacgm" or "geo"')
     else:
         pass
+
+    # Filtering out data that covers areas larger than the cutoff size
+    area_data = np.array(
+        [vort_measurement.area_km2 for vort_measurement in vort_array]
+    )
+
+    vort_array = vort_array[area_data <= plot_params.area_km2_cuttoff]
 
     # Extracts data
     phi_coords = plot_utils.mlt_to_phi(

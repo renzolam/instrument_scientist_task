@@ -4,7 +4,7 @@ Author        : Pak Yin (Renzo) Lam
                 paklam@bas.ac.uk
 
 Date Created  : 2024-08-10
-Last Modified : 2024-08-17
+Last Modified : 2024-08-18
 
 Summary       : Plots statistical analysis (mean, median and number of data points) for vorticity data according
 to their seasons
@@ -558,6 +558,14 @@ def plot_mean_median_counts(
         raise ValueError('Coord must be either "aacgm" or "geo"')
     else:
         pass
+
+    # Filtering out data that covers areas larger than the cutoff size
+    for season, vort_arr in vort_by_season.items():
+        area_data = np.array(
+            [vort_measurement.area_km2 for vort_measurement in vort_arr]
+        )
+
+        vort_by_season[season] = vort_arr[area_data <= plot_params.area_km2_cuttoff]
 
     # Creates bin edges
 

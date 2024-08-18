@@ -4,7 +4,7 @@ Author        : Pak Yin (Renzo) Lam
                 paklam@bas.ac.uk
 
 Date Created  : 2024-08-14
-Last Modified : 2024-08-17
+Last Modified : 2024-08-18
 
 Summary       : Analyses the R1 current by plotting the average vorticity (across a specified range of AACGM latitudes)
 across all MLT
@@ -278,7 +278,15 @@ def plot(
         "winter": "black",
     }
 
-    bin_centres_mlt = np.arange(0.5, 24, 1)
+    # Filtering out data that covers areas larger than the cutoff size
+    for season, vort_arr in vort_by_season.items():
+        area_data = np.array(
+            [vort_measurement.area_km2 for vort_measurement in vort_arr]
+        )
+
+        vort_by_season[season] = vort_arr[area_data <= plot_params.area_km2_cuttoff]
+
+    bin_centres_mlt = np.arange(plot_params.mlt_bin_size_hr / 2, 24, plot_params.mlt_bin_size_hr)
 
     fig, ax = plt.subplots(figsize=(30, 17))
 
