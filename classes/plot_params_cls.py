@@ -38,6 +38,7 @@ class PlotParams:
     count_cutoff: int = (
         120  # Bins with fewer data points than this cutoff will not be plotted
     )
+    area_km2_cuttoff: float = 4e4  # Data with area larger than this will be ignored
 
     r1_vort_aacgm_lat_lim: List[float] = [72, 77]
 
