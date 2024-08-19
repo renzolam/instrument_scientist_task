@@ -242,7 +242,6 @@ def _plot_subplot(
     return None
 
 
-@ray.remote
 def plot_sd_max_min(
     plot_params: PlotParams,
     vort_array: NDArray,

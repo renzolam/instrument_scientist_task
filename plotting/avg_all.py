@@ -252,7 +252,6 @@ def _plot_subplot(
     return None
 
 
-@ray.remote
 def plot_mean_median_counts(
         plot_params: PlotParams,
         vort_array: NDArray,

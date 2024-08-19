@@ -242,7 +242,6 @@ def formatting(
     return None
 
 
-@ray.remote
 def plot(
     plot_params: PlotParams,
     vort_by_season: Dict[str, NDArray[VortMeasurement]],

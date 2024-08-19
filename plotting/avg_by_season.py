@@ -515,7 +515,6 @@ def _plot_1_season(
     return None
 
 
-@ray.remote
 def plot_mean_median_counts(
     plot_params: PlotParams,
     vort_by_season: Dict[str, NDArray[VortMeasurement]],

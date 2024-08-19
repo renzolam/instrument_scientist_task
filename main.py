@@ -68,22 +68,23 @@ if __name__ == "__main__":
         )  # Data separated by seasons
 
         ###################################
-        # Plots in parallel
-        ray.init()
-        refs = [
-            # Produces plots for mean, median and number of data points
-            avg_all.plot_mean_median_counts.remote(plot_params, all_vort),
-            avg_by_season.plot_mean_median_counts.remote(plot_params, vort_by_season),
-            # Produces plots that show distribution of data
-            sd_all.plot_sd_max_min.remote(plot_params, all_vort),
-            sd_by_season.plot.remote(plot_params, vort_by_season),
-            # Analyses the R1 vorticity
-            r1_avg_vs_mlt.plot.remote(plot_params, vort_by_season),
-            # Histogram for area
-            area_histogram.plot.remote(plot_params, all_vort),
-        ]
-        ray.get(refs)
-        ray.shutdown()
+        logger.info(
+            f"Producing plots now..."
+        )
+
+        # Produces plots for mean, median and number of data points
+        avg_all.plot_mean_median_counts(plot_params, all_vort)
+        avg_by_season.plot_mean_median_counts(plot_params, vort_by_season)
+
+        # Produces plots that show distribution of data
+        sd_all.plot_sd_max_min(plot_params, all_vort)
+        sd_by_season.plot(plot_params, vort_by_season)
+
+        # Analyses the R1 vorticity
+        r1_avg_vs_mlt.plot(plot_params, vort_by_season)
+
+        # Histogram for area
+        area_histogram.plot(plot_params, all_vort)
 
     except Exception as e:
         logger.exception(e)
